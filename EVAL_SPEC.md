@@ -10,15 +10,18 @@ No metric, grouping, or normalization changes after seeing results.
 
 ## 1. Models under test
 
-| Model | HF checkpoint | Role | Revision (pin before first eval) |
+| Model | HF checkpoint | Role | Revision (full SHA in `pins.json`) |
 |---|---|---|---|
-| Canary-Qwen 2.5B | `nvidia/canary-qwen-2.5b` | Accuracy frontier | `TODO: pin` |
-| Parakeet TDT 0.6B v2 | `nvidia/parakeet-tdt-0.6b-v2` | Speed frontier (English-specialized) | `TODO: pin` |
-| Parakeet TDT 0.6B v3 | `nvidia/parakeet-tdt-0.6b-v3` | Speed frontier (multilingual successor) | `TODO: pin` |
-| Whisper large-v3-turbo | `openai/whisper-large-v3-turbo` | Pruned-decoder baseline | `TODO: pin` |
-| Distil-Whisper | `distil-whisper/distil-large-v3.5` | Distillation probe | `TODO: pin` |
-| Moonshine Voice | `UsefulSensors/moonshine-streaming-medium` | Edge/streaming (2026 gen) | `TODO: pin` |
-| Whisper-small | `openai/whisper-small` | Fine-tuning base (ERM + Group-DRO) | `TODO: pin` |
+| Canary-Qwen 2.5B | `nvidia/canary-qwen-2.5b` | Accuracy frontier | `b1469e1bba1c` |
+| Parakeet TDT 0.6B v2 | `nvidia/parakeet-tdt-0.6b-v2` | Speed frontier (English-specialized) | `ae9ad07059c7` |
+| Parakeet TDT 0.6B v3 | `nvidia/parakeet-tdt-0.6b-v3` | Speed frontier (multilingual successor) | `541d1f99c6b0` |
+| Whisper large-v3-turbo | `openai/whisper-large-v3-turbo` | Pruned-decoder baseline | `41f01f3fe87f` |
+| Distil-Whisper | `distil-whisper/distil-large-v3.5` | Distillation probe | `728a7691f3ff` |
+| Moonshine Voice | `UsefulSensors/moonshine-streaming-medium` | Edge/streaming (2026 gen) | `57b843633a8c` |
+| Whisper-small | `openai/whisper-small` | Fine-tuning base (ERM + Group-DRO) | `973afd24965f` |
+
+Datasets: EdAcc `d9ae7bd344f0` (matches the revision inspected for §4.3 marker rules),
+AfriSpeech-200 `b538c6e11191`. Pinned 2026-08-06 via `pin.py`; full SHAs in `pins.json`.
 
 **Resolved 2026-08-06:** Parakeet — both v2 and v3 (v2→v3 English accent-robustness delta is a
 free finding). Moonshine — Voice family, `moonshine-streaming-medium` (245M), in `transformers`
@@ -38,13 +41,13 @@ committed.
 - Fields: `speaker`, `text`, `accent` (linguist-annotated), `raw_accent`, `gender`, `l1`, `audio`.
 - **All headline numbers come from `test`.** `validation` is for harness debugging and
   fine-tuning model selection only.
-- Revision: `TODO: pin dataset SHA`.
+- Revision: `d9ae7bd344f0` (full SHA in `pins.json`).
 
 ### 2.2 Secondary: AfriSpeech-200 — `intronhealth/afrispeech-200`
 - Used for the fine-tuning experiment (train split) and as a second audit test set.
 - Speaker-disjoint splits already enforced by the dataset. Not all accents have all splits —
   group inclusion rule (§3) applies per split.
-- Revision: `TODO: pin`.
+- Revision: `b538c6e11191` (full SHA in `pins.json`).
 
 ### 2.3 Excluded (and why — goes in LIMITATIONS.md)
 - **Common Voice**: self-reported accent labels, noisy; would contaminate group definitions.

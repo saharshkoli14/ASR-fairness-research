@@ -1,0 +1,26 @@
+{
+  "pinned_at": "2026-08-06T22:07:25.299891+00:00",
+  "models": {
+    "nvidia/canary-qwen-2.5b": "b1469e1bba1cfe140205529c79c434ca47180960",
+    "nvidia/parakeet-tdt-0.6b-v2": "ae9ad07059c7c739ffaf932226a8fe64ae2620b0",
+    "nvidia/parakeet-tdt-0.6b-v3": "541d1f99c6b0c3cd0b11a95167540bb8edefd82b",
+    "openai/whisper-large-v3-turbo": "41f01f3fe87f28c78e2fbf8b568835947dd65ed9",
+    "distil-whisper/distil-large-v3.5": "728a7691f3ff1d3d971528d3203a6e9559165d41",
+    "UsefulSensors/moonshine-streaming-medium": "57b843633a8c183cadf6699ffa761377a933a866",
+    "openai/whisper-small": "973afd24965f72e36ca33b3055d56a652f456b4d"
+  },
+  "datasets": {
+    "edinburghcstr/edacc": "d9ae7bd344f0562b766ec93ee5ce8f2f9568ce66",
+    "intronhealth/afrispeech-200": "b538c6e111914a812af28ff677f8cffc9b404b7d"
+  },
+  "env_at_pin_time": {
+    "python": "3.14.2",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "torch": "2.11.0+cu128",
+    "transformers": "5.14.1",
+    "datasets": null,
+    "nemo": null,
+    "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU",
+    "cuda": "12.8"
+  }
+}
