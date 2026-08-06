@@ -13,20 +13,18 @@ No metric, grouping, or normalization changes after seeing results.
 | Model | HF checkpoint | Role | Revision (pin before first eval) |
 |---|---|---|---|
 | Canary-Qwen 2.5B | `nvidia/canary-qwen-2.5b` | Accuracy frontier | `TODO: pin` |
-| Parakeet TDT 0.6B | `nvidia/parakeet-tdt-0.6b-v2` **[DECISION: v2 vs v3]** | Speed frontier | `TODO: pin` |
+| Parakeet TDT 0.6B v2 | `nvidia/parakeet-tdt-0.6b-v2` | Speed frontier (English-specialized) | `TODO: pin` |
+| Parakeet TDT 0.6B v3 | `nvidia/parakeet-tdt-0.6b-v3` | Speed frontier (multilingual successor) | `TODO: pin` |
 | Whisper large-v3-turbo | `openai/whisper-large-v3-turbo` | Pruned-decoder baseline | `TODO: pin` |
 | Distil-Whisper | `distil-whisper/distil-large-v3.5` | Distillation probe | `TODO: pin` |
-| Moonshine | **[DECISION: Moonshine Voice (2026) vs `UsefulSensors/moonshine-base`]** | Edge/streaming | `TODO: pin` |
+| Moonshine Voice | `UsefulSensors/moonshine-streaming-medium` | Edge/streaming (2026 gen) | `TODO: pin` |
 | Whisper-small | `openai/whisper-small` | Fine-tuning base (ERM + Group-DRO) | `TODO: pin` |
 
-**[DECISION] Parakeet v2 vs v3.** v2 is English-specialized; v3 is the multilingual successor the
-field is adopting. Recommendation: audit **both** (inference-only, cheap) — "did the multilingual
-upgrade change English accent robustness?" is a free extra finding. If only one, v3 (it's what
-people deploy in 2026).
-
-**[DECISION] Moonshine version.** Moonshine Voice (Feb 2026, 245M, streaming-first) is the current
-family; moonshine-base is the 2024 model most citations refer to. Recommendation: Moonshine Voice —
-the audit's claim is about the 2026 generation.
+**Resolved 2026-08-06:** Parakeet — both v2 and v3 (v2→v3 English accent-robustness delta is a
+free finding). Moonshine — Voice family, `moonshine-streaming-medium` (245M), in `transformers`
+as "Moonshine Streaming" since Feb 2026. *Caveat:* its sliding-window encoder prefers
+flash-attention, which is painful on Windows; verify SDPA fallback during feasibility check
+before freeze.
 
 Pinning: resolve each repo's `main` commit SHA at spec-freeze time via
 `huggingface_hub.HfApi().model_info(repo_id).sha`, record it in the table above, and pass
@@ -104,8 +102,19 @@ All WER after text normalization (§4.3).
   silently change numbers.
 - Sanity check in CI: a fixed list of 20 (ref, hyp) pairs with known normalized WER must
   reproduce exactly.
-- EdAcc-specific: decide handling of disfluency/overlap markers in transcripts **after inspecting
-  50 raw transcripts** — rule written here before first eval. `[DECISION — pending data inspection]`
+- **EdAcc-specific rules** (from inspection of 50 raw validation transcripts, 2026-08-06;
+  observed dataset revision `d9ae7bd344f0562b766ec93ee5ce8f2f9568ce66`):
+  1. **Drop** utterances whose text is exactly `IGNORE_TIME_SEGMENT_IN_SCORING` (corpus-marked
+     unscoreable segments).
+  2. **Drop** utterances containing `<FOREIGN>`: the tag stands in for spoken non-English content
+     absent from the reference — stripping it would charge models insertion errors for correctly
+     transcribing real speech. Unscoreable, not strippable.
+  3. **Strip** non-speech event tags `<OVERLAP>`, `<LAUGH>`, `<DTMF>` (pattern `<[A-Z_]+>`) from
+     references before normalization.
+  4. Doubled quotes (`''…''`) and casing are handled by the Whisper normalizer; no extra rule.
+  5. **Report per-group exclusion rates** from rules 1–2 in the appendix. Code-switching
+     correlates with accent group, so exclusions are non-random; if any group loses > 10% of its
+     audio, flag it in LIMITATIONS.md. The cleaning itself must not silently bias the audit.
 
 ### 4.4 Statistical comparisons
 - Model A vs model B on gap/worst-group: paired bootstrap over speakers, report CI of the
@@ -147,11 +156,16 @@ All WER after text normalization (§4.3).
 ---
 
 ## Open decisions (blocking freeze)
-1. Parakeet v2, v3, or both. (Recommend both.)
-2. Moonshine Voice vs moonshine-base. (Recommend Voice.)
-3. EdAcc transcript disfluency handling — pending inspection of raw data.
+1. ~~Parakeet v2, v3, or both.~~ **Resolved: both** (2026-08-06).
+2. ~~Moonshine Voice vs moonshine-base.~~ **Resolved: Voice / `moonshine-streaming-medium`** (2026-08-06).
+3. ~~EdAcc transcript disfluency handling.~~ **Resolved: rules 1–5 in §4.3** (2026-08-06).
 4. Concurrency levels for load test final (1/2/4 proposed) — sanity-check against what 8 GB allows
-   for the 2.5B model.
+   for the 2.5B model. Resolves during feasibility check (first VRAM measurements).
 
 ## Changelog
 - 2026-08-06: v0.1 initial draft.
+- 2026-08-06: Resolved decisions 1–2 (Parakeet both versions; Moonshine Voice medium). Flagged
+  flash-attention/Windows risk for Moonshine Streaming.
+- 2026-08-06: Resolved decision 3 (EdAcc marker rules) from raw-data inspection. Spec is frozen
+  for accuracy methodology; only decision 4 (load-test concurrency) remains, pending feasibility
+  measurements.
