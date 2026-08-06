@@ -1,0 +1,9 @@
+{
+  "source": "openai/whisper",
+  "commit": "5f86d1d86363843179951550570367b37c5d6f78",
+  "files": [
+    "whisper/normalizers/english.py",
+    "whisper/normalizers/basic.py",
+    "whisper/normalizers/english.json"
+  ]
+}

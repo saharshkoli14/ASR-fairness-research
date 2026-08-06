@@ -19,6 +19,7 @@ dependencies = [
     "soundfile",
     "numpy",
     "regex",
+    "more-itertools",   # required by the vendored Whisper normalizer
 ]
 
 [project.optional-dependencies]
