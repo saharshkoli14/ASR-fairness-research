@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "asr-fairness-audit"
+version = "0.1.0"
+description = "Accent-fairness disparity audit harness for Hugging Face ASR models"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Saharsh Koli", email = "saharshkoli7007@gmail.com" }]
+dependencies = [
+    "torch",
+    "transformers",
+    "datasets",
+    "huggingface_hub",
+    "jiwer>=3.0",
+    "soundfile",
+    "numpy",
+    "regex",
+]
+
+[project.optional-dependencies]
+nemo = ["nemo_toolkit[asr]"]          # Linux/WSL2 only — required for Parakeet and Canary-Qwen
+dev = ["pytest", "ruff"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+asr_fairness_audit = ["_vendor/*.json", "_vendor/*.py"]
+
+[tool.ruff]
+line-length = 110
+target-version = "py310"
