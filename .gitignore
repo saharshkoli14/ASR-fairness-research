@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+
+# ML artifacts — never commit weights or audio
+*.ckpt
+*.pt
+*.safetensors
+*.nemo
+*.onnx
+checkpoints/
+wandb/
+hf_cache/
+data/
+*.wav
+*.flac
+*.mp3
+
+# Results are committed ONLY via results/ CSVs, not scratch
+scratch/
+*.log
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
