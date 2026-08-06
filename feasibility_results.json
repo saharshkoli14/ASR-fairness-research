@@ -1,0 +1,234 @@
+[
+  {
+    "model": "whisper-large-v3-turbo",
+    "repo_id": "openai/whisper-large-v3-turbo",
+    "backend": "hf",
+    "timestamp": "2026-08-06T21:28:13.464901+00:00",
+    "env": {
+      "cuda": true,
+      "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU",
+      "total_vram_gb": 8.0,
+      "torch": "2.11.0+cu128",
+      "cuda_version": "12.8",
+      "platform": "Windows-11-10.0.26200-SP0"
+    },
+    "ok": true,
+    "load_seconds": 21.5,
+    "infer_seconds_10s_audio": 0.75,
+    "peak_vram_allocated_gb": 1.72,
+    "peak_vram_reserved_gb": 1.91,
+    "fits_budget": true,
+    "sample_output": " so"
+  },
+  {
+    "model": "distil-large-v3.5",
+    "repo_id": "distil-whisper/distil-large-v3.5",
+    "backend": "hf",
+    "timestamp": "2026-08-06T21:28:49.610097+00:00",
+    "env": {
+      "cuda": true,
+      "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU",
+      "total_vram_gb": 8.0,
+      "torch": "2.11.0+cu128",
+      "cuda_version": "12.8",
+      "platform": "Windows-11-10.0.26200-SP0"
+    },
+    "ok": true,
+    "load_seconds": 27.4,
+    "infer_seconds_10s_audio": 0.57,
+    "peak_vram_allocated_gb": 1.55,
+    "peak_vram_reserved_gb": 1.73,
+    "fits_budget": true,
+    "sample_output": "so"
+  },
+  {
+    "model": "whisper-small",
+    "repo_id": "openai/whisper-small",
+    "backend": "hf",
+    "timestamp": "2026-08-06T21:29:24.888344+00:00",
+    "env": {
+      "cuda": true,
+      "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU",
+      "total_vram_gb": 8.0,
+      "torch": "2.11.0+cu128",
+      "cuda_version": "12.8",
+      "platform": "Windows-11-10.0.26200-SP0"
+    },
+    "ok": true,
+    "load_seconds": 10.3,
+    "infer_seconds_10s_audio": 7.87,
+    "peak_vram_allocated_gb": 0.84,
+    "peak_vram_reserved_gb": 0.93,
+    "fits_budget": true,
+    "sample_output": " \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da \u10da"
+  },
+  {
+    "model": "moonshine-streaming-medium",
+    "repo_id": "UsefulSensors/moonshine-streaming-medium",
+    "backend": "hf-sdpa",
+    "timestamp": "2026-08-06T21:29:50.503099+00:00",
+    "env": {
+      "cuda": true,
+      "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU",
+      "total_vram_gb": 8.0,
+      "torch": "2.11.0+cu128",
+      "cuda_version": "12.8",
+      "platform": "Windows-11-10.0.26200-SP0"
+    },
+    "ok": true,
+    "load_seconds": 15.5,
+    "infer_seconds_10s_audio": 5.65,
+    "peak_vram_allocated_gb": 0.65,
+    "peak_vram_reserved_gb": 0.75,
+    "fits_budget": true,
+    "sample_output": ""
+  },
+  {
+    "model": "parakeet-tdt-0.6b-v2",
+    "repo_id": "nvidia/parakeet-tdt-0.6b-v2",
+    "backend": "nemo-asr",
+    "timestamp": "2026-08-06T21:30:19.917532+00:00",
+    "env": {
+      "cuda": true,
+      "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU",
+      "total_vram_gb": 8.0,
+      "torch": "2.11.0+cu128",
+      "cuda_version": "12.8",
+      "platform": "Windows-11-10.0.26200-SP0"
+    },
+    "ok": false,
+    "error": "ModuleNotFoundError: No module named 'nemo'"
+  },
+  {
+    "model": "parakeet-tdt-0.6b-v3",
+    "repo_id": "nvidia/parakeet-tdt-0.6b-v3",
+    "backend": "nemo-asr",
+    "timestamp": "2026-08-06T21:30:22.969876+00:00",
+    "env": {
+      "cuda": true,
+      "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU",
+      "total_vram_gb": 8.0,
+      "torch": "2.11.0+cu128",
+      "cuda_version": "12.8",
+      "platform": "Windows-11-10.0.26200-SP0"
+    },
+    "ok": false,
+    "error": "ModuleNotFoundError: No module named 'nemo'"
+  },
+  {
+    "model": "canary-qwen-2.5b",
+    "repo_id": "nvidia/canary-qwen-2.5b",
+    "backend": "nemo-salm",
+    "timestamp": "2026-08-06T21:30:25.995170+00:00",
+    "env": {
+      "cuda": true,
+      "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU",
+      "total_vram_gb": 8.0,
+      "torch": "2.11.0+cu128",
+      "cuda_version": "12.8",
+      "platform": "Windows-11-10.0.26200-SP0"
+    },
+    "ok": false,
+    "error": "ModuleNotFoundError: No module named 'nemo'"
+  },
+  {
+    "model": "parakeet-tdt-0.6b-v2",
+    "repo_id": "nvidia/parakeet-tdt-0.6b-v2",
+    "backend": "nemo-asr",
+    "timestamp": "2026-08-06T21:47:20.964571+00:00",
+    "env": {
+      "cuda": true,
+      "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU",
+      "total_vram_gb": 8.0,
+      "torch": "2.13.0+cu130",
+      "cuda_version": "13.0",
+      "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39"
+    },
+    "ok": true,
+    "load_seconds": 41.2,
+    "infer_seconds_10s_audio": 1.33,
+    "peak_vram_allocated_gb": 4.65,
+    "peak_vram_reserved_gb": 4.8,
+    "fits_budget": true,
+    "sample_output": "Hypothesis(score=414.412109375, y_sequence=tensor([164, 834, 857, 827, 834, 834, 841]), text='Mm-hmm.', dec_out=None, dec_state=None, timestamp=[], alignments=None, frame_confidence=None, token_confid"
+  },
+  {
+    "model": "parakeet-tdt-0.6b-v3",
+    "repo_id": "nvidia/parakeet-tdt-0.6b-v3",
+    "backend": "nemo-asr",
+    "timestamp": "2026-08-06T21:48:20.438282+00:00",
+    "env": {
+      "cuda": true,
+      "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU",
+      "total_vram_gb": 8.0,
+      "torch": "2.13.0+cu130",
+      "cuda_version": "13.0",
+      "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39"
+    },
+    "ok": true,
+    "load_seconds": 47.0,
+    "infer_seconds_10s_audio": 0.72,
+    "peak_vram_allocated_gb": 4.71,
+    "peak_vram_reserved_gb": 4.89,
+    "fits_budget": true,
+    "sample_output": "Hypothesis(score=0.0, y_sequence=tensor([], dtype=torch.int64), text='', dec_out=None, dec_state=None, timestamp=[], alignments=None, frame_confidence=None, token_confidence=None, word_confidence=None"
+  },
+  {
+    "model": "canary-qwen-2.5b",
+    "repo_id": "nvidia/canary-qwen-2.5b",
+    "backend": "nemo-salm",
+    "timestamp": "2026-08-06T21:49:37.408902+00:00",
+    "env": {
+      "cuda": true,
+      "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU",
+      "total_vram_gb": 8.0,
+      "torch": "2.13.0+cu130",
+      "cuda_version": "13.0",
+      "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39"
+    },
+    "ok": false,
+    "error": "ValueError: <class 'nemo.collections.speechlm2.modules.perception.AudioPerceptionModule'> Arguments ``input_signal`` and ``input_signal_length`` are mutually exclusive  with ``processed_signal`` and ``processed_signal_len`` arguments."
+  },
+  {
+    "model": "canary-qwen-2.5b",
+    "repo_id": "nvidia/canary-qwen-2.5b",
+    "backend": "nemo-salm",
+    "timestamp": "2026-08-06T21:55:58.381475+00:00",
+    "env": {
+      "cuda": true,
+      "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU",
+      "total_vram_gb": 8.0,
+      "torch": "2.13.0+cu130",
+      "cuda_version": "13.0",
+      "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39"
+    },
+    "ok": true,
+    "load_seconds": 43.8,
+    "infer_seconds_10s_audio": 8.67,
+    "peak_vram_allocated_gb": 9.65,
+    "peak_vram_reserved_gb": 9.69,
+    "fits_budget": false,
+    "sample_output": "One two three four five six seven eight nine"
+  },
+  {
+    "model": "canary-qwen-2.5b",
+    "repo_id": "nvidia/canary-qwen-2.5b",
+    "backend": "nemo-salm",
+    "timestamp": "2026-08-06T21:58:34.371881+00:00",
+    "env": {
+      "cuda": true,
+      "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU",
+      "total_vram_gb": 8.0,
+      "torch": "2.13.0+cu130",
+      "cuda_version": "13.0",
+      "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39"
+    },
+    "ok": true,
+    "load_seconds": 37.8,
+    "infer_seconds_10s_audio": 2.99,
+    "peak_vram_allocated_gb": 4.83,
+    "peak_vram_reserved_gb": 4.86,
+    "fits_budget": true,
+    "sample_output": "One two three four five six seven eight nine"
+  }
+]

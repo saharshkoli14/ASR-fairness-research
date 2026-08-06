@@ -1,7 +1,7 @@
 # Evaluation Specification — ASR Accent-Fairness Audit
 
-Status: DRAFT v0.1 — open decisions marked `[DECISION]`. Once resolved, this file is frozen;
-any later change requires a dated changelog entry at the bottom.
+Status: **FROZEN v1.0 (2026-08-06)** — all four opening decisions resolved. Any later change
+requires a dated changelog entry at the bottom, made *before* the affected numbers are produced.
 
 Principle: every choice here is locked **before** any model produces a number that goes in the paper.
 No metric, grouping, or normalization changes after seeing results.
@@ -159,8 +159,9 @@ All WER after text normalization (§4.3).
 1. ~~Parakeet v2, v3, or both.~~ **Resolved: both** (2026-08-06).
 2. ~~Moonshine Voice vs moonshine-base.~~ **Resolved: Voice / `moonshine-streaming-medium`** (2026-08-06).
 3. ~~EdAcc transcript disfluency handling.~~ **Resolved: rules 1–5 in §4.3** (2026-08-06).
-4. Concurrency levels for load test final (1/2/4 proposed) — sanity-check against what 8 GB allows
-   for the 2.5B model. Resolves during feasibility check (first VRAM measurements).
+4. ~~Concurrency levels for load test.~~ **Resolved: 1/2/4 confirmed** (2026-08-06). Feasibility
+   measured peak 4.86 GB reserved for the largest model (Canary-Qwen, bf16) — ~2.6 GB headroom on
+   the 7.5 GB budget with a single model instance serving queued requests.
 
 ## Changelog
 - 2026-08-06: v0.1 initial draft.
@@ -169,3 +170,9 @@ All WER after text normalization (§4.3).
 - 2026-08-06: Resolved decision 3 (EdAcc marker rules) from raw-data inspection. Spec is frozen
   for accuracy methodology; only decision 4 (load-test concurrency) remains, pending feasibility
   measurements.
+- 2026-08-06: Feasibility complete — all 7 checkpoints load and transcribe on RTX 4060 (WSL2 for
+  NeMo models). Resolved decision 4 (concurrency 1/2/4). Findings recorded for writeup: NeMo
+  restores Canary-Qwen in fp32 (~9.7 GB → silent PCIe spill on 8 GB; bf16 cast → 4.86 GB, 3×
+  faster); Moonshine Streaming works with SDPA (no flash-attn needed). Canary-Qwen inference
+  protocol addendum: cast to bf16 after restore — this IS the documented intended precision (§5).
+  **Spec frozen v1.0.**
