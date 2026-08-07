@@ -9,10 +9,13 @@ Output groups.json is committed and is INPUT to all evals — never recomputed.
 Downloads EdAcc test audio (several GB) on first run; run on your machine.
 """
 
+import io
 import json
 import sys
 from collections import defaultdict
 from pathlib import Path
+
+import soundfile as sf
 
 sys.path.insert(0, str(Path(__file__).parents[1] / "src"))
 
@@ -34,8 +37,8 @@ def main():
     seconds: dict = defaultdict(float)
     speakers: dict = defaultdict(set)
     for row in cs.rows:
-        audio = row["audio"]
-        seconds[row["accent"]] += len(audio["array"]) / audio["sampling_rate"]
+        info = sf.info(io.BytesIO(row["audio"]["bytes"]))
+        seconds[row["accent"]] += info.duration
         speakers[row["accent"]].add(row["speaker"])
 
     groups, pooled = {}, {}

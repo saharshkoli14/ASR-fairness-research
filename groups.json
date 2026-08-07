@@ -1,0 +1,132 @@
+{
+  "dataset_revision": "d9ae7bd344f0562b766ec93ee5ce8f2f9568ce66",
+  "split": "test",
+  "rule": {
+    "min_minutes": 20.0,
+    "min_speakers": 3
+  },
+  "groups": {
+    "Indian English": {
+      "minutes": 66.81,
+      "n_speakers": 3,
+      "n_utterances": 627
+    },
+    "Irish English": {
+      "minutes": 48.64,
+      "n_speakers": 3,
+      "n_utterances": 350
+    },
+    "Jamaican English": {
+      "minutes": 44.65,
+      "n_speakers": 4,
+      "n_utterances": 455
+    },
+    "Mainstream US English": {
+      "minutes": 110.89,
+      "n_speakers": 9,
+      "n_utterances": 875
+    },
+    "Nigerian English": {
+      "minutes": 147.67,
+      "n_speakers": 5,
+      "n_utterances": 1351
+    },
+    "Spanish": {
+      "minutes": 80.31,
+      "n_speakers": 5,
+      "n_utterances": 852
+    },
+    "Vietnamese": {
+      "minutes": 71.83,
+      "n_speakers": 6,
+      "n_utterances": 577
+    }
+  },
+  "pooled_into_other": {
+    "Bulgarian": {
+      "minutes": 19.28,
+      "n_speakers": 2,
+      "n_utterances": 21
+    },
+    "Catalan": {
+      "minutes": 15.24,
+      "n_speakers": 1,
+      "n_utterances": 81
+    },
+    "Chinese": {
+      "minutes": 24.28,
+      "n_speakers": 2,
+      "n_utterances": 130
+    },
+    "Don't know": {
+      "minutes": 10.65,
+      "n_speakers": 2,
+      "n_utterances": 93
+    },
+    "Eastern European": {
+      "minutes": 6.55,
+      "n_speakers": 1,
+      "n_utterances": 74
+    },
+    "European": {
+      "minutes": 8.85,
+      "n_speakers": 1,
+      "n_utterances": 66
+    },
+    "French": {
+      "minutes": 8.78,
+      "n_speakers": 1,
+      "n_utterances": 76
+    },
+    "Ghanain English": {
+      "minutes": 30.35,
+      "n_speakers": 1,
+      "n_utterances": 356
+    },
+    "Indonesian": {
+      "minutes": 15.01,
+      "n_speakers": 1,
+      "n_utterances": 214
+    },
+    "Israeli": {
+      "minutes": 30.34,
+      "n_speakers": 1,
+      "n_utterances": 266
+    },
+    "Italian": {
+      "minutes": 28.25,
+      "n_speakers": 1,
+      "n_utterances": 274
+    },
+    "Kenyan English": {
+      "minutes": 88.64,
+      "n_speakers": 2,
+      "n_utterances": 1133
+    },
+    "Latin American": {
+      "minutes": 15.83,
+      "n_speakers": 2,
+      "n_utterances": 86
+    },
+    "Lithuanian": {
+      "minutes": 55.68,
+      "n_speakers": 2,
+      "n_utterances": 573
+    },
+    "Romanian": {
+      "minutes": 11.67,
+      "n_speakers": 1,
+      "n_utterances": 270
+    },
+    "Scottish English": {
+      "minutes": 13.12,
+      "n_speakers": 2,
+      "n_utterances": 198
+    },
+    "Southern British English": {
+      "minutes": 18.2,
+      "n_speakers": 2,
+      "n_utterances": 179
+    }
+  }
+}
