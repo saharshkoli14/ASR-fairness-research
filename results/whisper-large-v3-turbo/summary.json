@@ -1,0 +1,367 @@
+{
+  "model": "whisper-large-v3-turbo",
+  "repo_id": "openai/whisper-large-v3-turbo",
+  "model_revision": "41f01f3fe87f28c78e2fbf8b568835947dd65ed9",
+  "dataset_revision": "d9ae7bd344f0562b766ec93ee5ce8f2f9568ce66",
+  "split": "test",
+  "limit": null,
+  "harness_commit": "83085236bc1ff48647a12c4f193e2bdaebb5cd97",
+  "normalizer_source": "5f86d1d86363843179951550570367b37c5d6f78",
+  "n_scored_utterances": 5087,
+  "language_misdetections": 0,
+  "hallucination_loops_by_group": {
+    "Nigerian English": {
+      "count": 3,
+      "utt_ids": [
+        "test-1717",
+        "test-1966",
+        "test-2143"
+      ]
+    },
+    "Spanish": {
+      "count": 2,
+      "utt_ids": [
+        "test-5620",
+        "test-5918"
+      ]
+    },
+    "Vietnamese": {
+      "count": 1,
+      "utt_ids": [
+        "test-8173"
+      ]
+    },
+    "Mainstream US English": {
+      "count": 2,
+      "utt_ids": [
+        "test-8983",
+        "test-9007"
+      ]
+    }
+  },
+  "metrics": {
+    "micro_wer": 0.20323265589114703,
+    "macro_wer": 0.19965265887878042,
+    "worst_group_wer": 0.27875857415945127,
+    "worst_group": "Vietnamese",
+    "gap_max_minus_min": 0.17369383067477662,
+    "std_across_groups": 0.06313204416992285,
+    "per_group": {
+      "Mainstream US English": {
+        "wer": 0.1862557642559892,
+        "n_utterances": 875,
+        "n_speakers": 9,
+        "ref_words": 17782
+      },
+      "Spanish": {
+        "wer": 0.25530222693531285,
+        "n_utterances": 852,
+        "n_speakers": 5,
+        "ref_words": 11316
+      },
+      "Indian English": {
+        "wer": 0.10506474348467465,
+        "n_utterances": 627,
+        "n_speakers": 3,
+        "ref_words": 12202
+      },
+      "Nigerian English": {
+        "wer": 0.23448533532598542,
+        "n_utterances": 1351,
+        "n_speakers": 5,
+        "ref_words": 26765
+      },
+      "Irish English": {
+        "wer": 0.11269133421718694,
+        "n_utterances": 350,
+        "n_speakers": 3,
+        "ref_words": 8297
+      },
+      "Jamaican English": {
+        "wer": 0.22501063377286262,
+        "n_utterances": 455,
+        "n_speakers": 4,
+        "ref_words": 7053
+      },
+      "Vietnamese": {
+        "wer": 0.27875857415945127,
+        "n_utterances": 577,
+        "n_speakers": 6,
+        "ref_words": 8893
+      }
+    }
+  },
+  "bootstrap": {
+    "gap_max_minus_min": {
+      "metric": "gap_max_minus_min",
+      "point": 0.17369383067477662,
+      "ci_low": 0.13109392571923303,
+      "ci_high": 0.2854101829783915,
+      "n_boot": 1000,
+      "seed": 3407
+    },
+    "worst_group_wer": {
+      "metric": "worst_group_wer",
+      "point": 0.27875857415945127,
+      "ci_low": 0.24324559108168556,
+      "ci_high": 0.3712739966009533,
+      "n_boot": 1000,
+      "seed": 3407
+    },
+    "macro_wer": {
+      "metric": "macro_wer",
+      "point": 0.19965265887878042,
+      "ci_low": 0.1735275267722767,
+      "ci_high": 0.22621875965739552,
+      "n_boot": 1000,
+      "seed": 3407
+    }
+  },
+  "exclusions": [
+    {
+      "group": "Bulgarian",
+      "kept": 21,
+      "dropped": 2,
+      "exclusion_rate": 0.087,
+      "flag_over_10pct": false,
+      "reasons": {
+        "ignore_segment": 2
+      }
+    },
+    {
+      "group": "Catalan",
+      "kept": 81,
+      "dropped": 2,
+      "exclusion_rate": 0.0241,
+      "flag_over_10pct": false,
+      "reasons": {
+        "ignore_segment": 1,
+        "foreign": 1
+      }
+    },
+    {
+      "group": "Chinese",
+      "kept": 130,
+      "dropped": 2,
+      "exclusion_rate": 0.0152,
+      "flag_over_10pct": false,
+      "reasons": {
+        "ignore_segment": 2
+      }
+    },
+    {
+      "group": "Don't know",
+      "kept": 93,
+      "dropped": 2,
+      "exclusion_rate": 0.0211,
+      "flag_over_10pct": false,
+      "reasons": {
+        "ignore_segment": 2
+      }
+    },
+    {
+      "group": "Eastern European",
+      "kept": 74,
+      "dropped": 1,
+      "exclusion_rate": 0.0133,
+      "flag_over_10pct": false,
+      "reasons": {
+        "ignore_segment": 1
+      }
+    },
+    {
+      "group": "European",
+      "kept": 66,
+      "dropped": 1,
+      "exclusion_rate": 0.0149,
+      "flag_over_10pct": false,
+      "reasons": {
+        "ignore_segment": 1
+      }
+    },
+    {
+      "group": "French",
+      "kept": 76,
+      "dropped": 1,
+      "exclusion_rate": 0.013,
+      "flag_over_10pct": false,
+      "reasons": {
+        "ignore_segment": 1
+      }
+    },
+    {
+      "group": "Ghanain English",
+      "kept": 356,
+      "dropped": 1,
+      "exclusion_rate": 0.0028,
+      "flag_over_10pct": false,
+      "reasons": {
+        "ignore_segment": 1
+      }
+    },
+    {
+      "group": "Indian English",
+      "kept": 627,
+      "dropped": 4,
+      "exclusion_rate": 0.0063,
+      "flag_over_10pct": false,
+      "reasons": {
+        "ignore_segment": 4
+      }
+    },
+    {
+      "group": "Indonesian",
+      "kept": 214,
+      "dropped": 1,
+      "exclusion_rate": 0.0047,
+      "flag_over_10pct": false,
+      "reasons": {
+        "ignore_segment": 1
+      }
+    },
+    {
+      "group": "Irish English",
+      "kept": 350,
+      "dropped": 3,
+      "exclusion_rate": 0.0085,
+      "flag_over_10pct": false,
+      "reasons": {
+        "ignore_segment": 3
+      }
+    },
+    {
+      "group": "Israeli",
+      "kept": 266,
+      "dropped": 1,
+      "exclusion_rate": 0.0037,
+      "flag_over_10pct": false,
+      "reasons": {
+        "ignore_segment": 1
+      }
+    },
+    {
+      "group": "Italian",
+      "kept": 274,
+      "dropped": 1,
+      "exclusion_rate": 0.0036,
+      "flag_over_10pct": false,
+      "reasons": {
+        "ignore_segment": 1
+      }
+    },
+    {
+      "group": "Jamaican English",
+      "kept": 455,
+      "dropped": 3,
+      "exclusion_rate": 0.0066,
+      "flag_over_10pct": false,
+      "reasons": {
+        "ignore_segment": 3
+      }
+    },
+    {
+      "group": "Kenyan English",
+      "kept": 1133,
+      "dropped": 24,
+      "exclusion_rate": 0.0207,
+      "flag_over_10pct": false,
+      "reasons": {
+        "ignore_segment": 2,
+        "foreign": 22
+      }
+    },
+    {
+      "group": "Latin American",
+      "kept": 86,
+      "dropped": 2,
+      "exclusion_rate": 0.0227,
+      "flag_over_10pct": false,
+      "reasons": {
+        "ignore_segment": 2
+      }
+    },
+    {
+      "group": "Lithuanian",
+      "kept": 573,
+      "dropped": 5,
+      "exclusion_rate": 0.0087,
+      "flag_over_10pct": false,
+      "reasons": {
+        "ignore_segment": 2,
+        "foreign": 3
+      }
+    },
+    {
+      "group": "Mainstream US English",
+      "kept": 875,
+      "dropped": 12,
+      "exclusion_rate": 0.0135,
+      "flag_over_10pct": false,
+      "reasons": {
+        "ignore_segment": 9,
+        "foreign": 3
+      }
+    },
+    {
+      "group": "Nigerian English",
+      "kept": 1351,
+      "dropped": 5,
+      "exclusion_rate": 0.0037,
+      "flag_over_10pct": false,
+      "reasons": {
+        "ignore_segment": 5
+      }
+    },
+    {
+      "group": "Romanian",
+      "kept": 270,
+      "dropped": 2,
+      "exclusion_rate": 0.0074,
+      "flag_over_10pct": false,
+      "reasons": {
+        "ignore_segment": 2
+      }
+    },
+    {
+      "group": "Scottish English",
+      "kept": 198,
+      "dropped": 2,
+      "exclusion_rate": 0.01,
+      "flag_over_10pct": false,
+      "reasons": {
+        "ignore_segment": 2
+      }
+    },
+    {
+      "group": "Southern British English",
+      "kept": 179,
+      "dropped": 2,
+      "exclusion_rate": 0.011,
+      "flag_over_10pct": false,
+      "reasons": {
+        "ignore_segment": 2
+      }
+    },
+    {
+      "group": "Spanish",
+      "kept": 852,
+      "dropped": 27,
+      "exclusion_rate": 0.0307,
+      "flag_over_10pct": false,
+      "reasons": {
+        "ignore_segment": 5,
+        "foreign": 22
+      }
+    },
+    {
+      "group": "Vietnamese",
+      "kept": 577,
+      "dropped": 6,
+      "exclusion_rate": 0.0103,
+      "flag_over_10pct": false,
+      "reasons": {
+        "ignore_segment": 6
+      }
+    }
+  ]
+}

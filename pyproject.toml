@@ -20,6 +20,7 @@ dependencies = [
     "numpy",
     "regex",
     "more-itertools",   # required by the vendored Whisper normalizer
+    "soxr",             # explicit resampling — avoids pipeline's ffmpeg dependency
 ]
 
 [project.optional-dependencies]

@@ -57,6 +57,8 @@ def evaluate(utts: list[Utterance]) -> dict:
         for g in group_err
     }
     wers = [v["wer"] for v in per_group.values()]
+    if not wers:
+        raise ValueError("No scoreable utterances — every input was filtered out (check group filtering).")
     return {
         "micro_wer": tot_err / tot_words if tot_words else float("nan"),
         "macro_wer": float(np.mean(wers)),

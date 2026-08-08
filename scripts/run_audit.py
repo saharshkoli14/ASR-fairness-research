@@ -58,7 +58,7 @@ def main():
     # Resume: skip already-transcribed utterance ids.
     done: dict[str, dict] = {}
     if tx_file.exists():
-        for line in tx_file.read_text().splitlines():
+        for line in tx_file.read_text(encoding="utf-8").splitlines():
             rec = json.loads(line)
             done[rec["utt_id"]] = rec
         print(f"Resuming: {len(done)} utterances already transcribed.")
@@ -102,17 +102,26 @@ def main():
         del transcriber
 
     # Score from the full transcript file (normalization happens here, never stored raw-free).
-    records = [json.loads(line) for line in tx_file.read_text().splitlines()]
-    audited_groups = set(groups["groups"]) if groups else {r["accent"] for r in records}
+    records = [json.loads(line) for line in tx_file.read_text(encoding="utf-8").splitlines()]
+    # Smoke runs (--limit) score every accent they see; real runs use frozen groups only.
+    if groups and not args.limit:
+        audited_groups = set(groups["groups"])
+    else:
+        audited_groups = {r["accent"] for r in records}
     utts, lang_misdetect = [], 0
+    loops: dict[str, list] = {}
     for r in records:
         group = r["accent"] if r["accent"] in audited_groups else "other"
         if group == "other":
             continue  # pooled groups: appendix only, never in disparity metrics (EVAL_SPEC §3)
         if r.get("detected_language") and "en" not in r["detected_language"].lower():
             lang_misdetect += 1
-        utts.append(Utterance(ref=normalize_reference(r["ref_raw"]), hyp=normalize(r["hyp_raw"]),
-                              group=group, speaker=r["speaker"]))
+        ref_n, hyp_n = normalize_reference(r["ref_raw"]), normalize(r["hyp_raw"])
+        # Hallucination-loop diagnostic (secondary; WER keeps these — deployed-default behavior):
+        # hypothesis blows past 5x the reference length (min 10 words to skip trivial cases).
+        if len(hyp_n.split()) > max(10, 5 * len(ref_n.split())):
+            loops.setdefault(group, []).append(r["utt_id"])
+        utts.append(Utterance(ref=ref_n, hyp=hyp_n, group=group, speaker=r["speaker"]))
 
     summary = {
         "model": args.model,
@@ -125,6 +134,7 @@ def main():
         "normalizer_source": vendor_info()["commit"],
         "n_scored_utterances": len(utts),
         "language_misdetections": lang_misdetect,
+        "hallucination_loops_by_group": {g: {"count": len(v), "utt_ids": v} for g, v in loops.items()},
         "metrics": evaluate(utts),
         "bootstrap": {m: bootstrap_ci(utts, metric=m)
                       for m in ("gap_max_minus_min", "worst_group_wer", "macro_wer")},

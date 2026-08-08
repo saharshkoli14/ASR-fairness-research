@@ -11,8 +11,10 @@ from .base import Transcription
 
 
 class NeMoTranscriber:
+    # batch_size=1 for accuracy runs, same policy as the HF backend (padding must
+    # not be able to influence outputs). See EVAL_SPEC changelog 2026-08-07.
     def __init__(self, repo_id: str, revision: str, kind: str = "asr",
-                 cast_bf16: bool = False, track_language: bool = False, batch_size: int = 8):
+                 cast_bf16: bool = False, track_language: bool = False, batch_size: int = 1):
         self.name = repo_id.split("/")[-1]
         self.repo_id = repo_id
         self.revision = revision  # recorded; NeMo from_pretrained pulls the repo's .nemo artifact

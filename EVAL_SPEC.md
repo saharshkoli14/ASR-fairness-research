@@ -173,6 +173,18 @@ All WER after text normalization (§4.3).
 - 2026-08-06: Resolved decision 3 (EdAcc marker rules) from raw-data inspection. Spec is frozen
   for accuracy methodology; only decision 4 (load-test concurrency) remains, pending feasibility
   measurements.
+- 2026-08-07: **Accuracy runs use batch_size=1** (decided before any full run completed).
+  Empirical: batched padding changed whisper-small outputs on 6/50 smoke utterances, and
+  utterances > 30 s crash batched Whisper padding while long-form decoding engages only at
+  batch 1. Efficiency runs (§4.2) may still batch — throughput at batch is part of what they
+  measure; output text from efficiency runs is never scored.
+- 2026-08-07: Added secondary diagnostic (before any full audit run; no reportable numbers
+  existed): per-group hallucination-loop rate, flagged when normalized hypothesis exceeds
+  max(10, 5× reference words). Motivated by smoke-run observation: whisper-small produced a
+  356-word repetition loop on a 2-word utterance, reproduced at batch=1 (real model behavior,
+  not a batching artifact). Loops REMAIN in WER (deployed-default behavior); the diagnostic
+  makes their frequency and group correlation visible. Loop rate differing by accent group
+  would itself be a fairness finding.
 - 2026-08-06: Feasibility complete — all 7 checkpoints load and transcribe on RTX 4060 (WSL2 for
   NeMo models). Resolved decision 4 (concurrency 1/2/4). Findings recorded for writeup: NeMo
   restores Canary-Qwen in fp32 (~9.7 GB → silent PCIe spill on 8 GB; bf16 cast → 4.86 GB, 3×
