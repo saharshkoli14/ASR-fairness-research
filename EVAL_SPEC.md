@@ -173,6 +173,12 @@ All WER after text normalization (§4.3).
 - 2026-08-06: Resolved decision 3 (EdAcc marker rules) from raw-data inspection. Spec is frozen
   for accuracy methodology; only decision 4 (load-test concurrency) remains, pending feasibility
   measurements.
+- 2026-08-08: Corrected HF-backend dtype to model-card defaults per §5 (was uniformly bf16 —
+  implementation error): Whisper family fp16, Moonshine fp32. A/B on 60 loop-flagged
+  whisper-small utterances: 57/60 loops persist at fp16 — loop behavior is real, not
+  precision-induced. Whisper-family runs regenerated at fp16 for config compliance; bf16
+  transcripts retained in git history. Moonshine addendum: inputs padded to 80-sample frame
+  multiple (model requirement).
 - 2026-08-07: **Accuracy runs use batch_size=1** (decided before any full run completed).
   Empirical: batched padding changed whisper-small outputs on 6/50 smoke utterances, and
   utterances > 30 s crash batched Whisper padding while long-form decoding engages only at

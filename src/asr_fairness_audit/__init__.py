@@ -15,10 +15,11 @@ MODELS = {
     "canary-qwen-2.5b": ("nvidia/canary-qwen-2.5b", "nemo", {"kind": "salm", "cast_bf16": True}),
     "parakeet-tdt-0.6b-v2": ("nvidia/parakeet-tdt-0.6b-v2", "nemo", {"kind": "asr"}),
     "parakeet-tdt-0.6b-v3": ("nvidia/parakeet-tdt-0.6b-v3", "nemo", {"kind": "asr", "track_language": True}),
-    "whisper-large-v3-turbo": ("openai/whisper-large-v3-turbo", "hf", {"language": "en"}),
-    "distil-large-v3.5": ("distil-whisper/distil-large-v3.5", "hf", {"language": "en"}),
-    "moonshine-streaming-medium": ("UsefulSensors/moonshine-streaming-medium", "hf", {"sdpa": True}),
-    "whisper-small": ("openai/whisper-small", "hf", {"language": "en"}),
+    "whisper-large-v3-turbo": ("openai/whisper-large-v3-turbo", "hf", {"language": "en", "dtype": "float16"}),
+    "distil-large-v3.5": ("distil-whisper/distil-large-v3.5", "hf", {"language": "en", "dtype": "float16"}),
+    "moonshine-streaming-medium": ("UsefulSensors/moonshine-streaming-medium", "hf",
+                                   {"sdpa": True, "dtype": "float32", "pad_to_multiple": 80}),
+    "whisper-small": ("openai/whisper-small", "hf", {"language": "en", "dtype": "float16"}),
 }
 
 

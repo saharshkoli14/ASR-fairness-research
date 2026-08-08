@@ -30,12 +30,16 @@ class HFTranscriber:
     # batch_size=1 is REQUIRED for accuracy runs: batched padding changes Whisper
     # outputs (6/50 differed on the smoke set), and >30 s utterances only get
     # long-form decoding at batch 1. Do not raise for accuracy. (EVAL_SPEC changelog 2026-08-07.)
+    # dtype follows each model card's documented default (EVAL_SPEC §5): fp16 for
+    # the Whisper family, fp32 for Moonshine (library default; 245M has no memory need).
     def __init__(self, repo_id: str, revision: str, language: str | None = None,
-                 sdpa: bool = False, device: str = "cuda:0", batch_size: int = 1):
+                 sdpa: bool = False, device: str = "cuda:0", batch_size: int = 1,
+                 dtype: str = "float16", pad_to_multiple: int | None = None):
         self.name = repo_id.split("/")[-1]
         self.repo_id = repo_id
         self.revision = revision
         self.batch_size = batch_size
+        self.pad_to_multiple = pad_to_multiple
         # Whisper family (language is set): return_timestamps=True enables the model's
         # documented sequential long-form decoding for >30 s utterances (EVAL_SPEC §5
         # "default chunking"). Applied uniformly to ALL utterances so decoding config is
@@ -48,13 +52,19 @@ class HFTranscriber:
             "automatic-speech-recognition",
             model=repo_id,
             revision=revision,
-            dtype=torch.bfloat16,
+            dtype=getattr(torch, dtype),
             device=device,
             model_kwargs=model_kwargs,
         )
 
+    def _prep(self, path: str) -> dict:
+        data = load_16k_mono(path)
+        if self.pad_to_multiple and (r := len(data) % self.pad_to_multiple):
+            data = np.pad(data, (0, self.pad_to_multiple - r))  # Moonshine: frame-multiple input
+        return {"array": data, "sampling_rate": TARGET_SR}
+
     def transcribe(self, wav_paths: list[str]) -> list[Transcription]:
-        inputs = [{"array": load_16k_mono(p), "sampling_rate": TARGET_SR} for p in wav_paths]
+        inputs = [self._prep(p) for p in wav_paths]
         kwargs = {"batch_size": self.batch_size}
         if self._return_timestamps:
             kwargs["return_timestamps"] = True
