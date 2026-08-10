@@ -123,6 +123,39 @@ All WER after text normalization (§4.3).
 - Model A vs model B on gap/worst-group: paired bootstrap over speakers, report CI of the
   difference. No claim of "X is less fair than Y" without a CI excluding zero.
 
+## 4.5 Determinism gate (added 2026-08-08 — required before any model's numbers are reported)
+
+A model's results are only reportable if its outputs are **position-independent**: transcribing
+the same audio must give the same text regardless of how many prior calls the process has made.
+
+Check: sample ≥ 25 utterances spread across a completed run, re-transcribe in a fresh process,
+diff against the stored hypotheses (`scripts/verify_determinism.py <model>`). Any mismatch means
+the run is not reproducible and the model is excluded until a deterministic runtime is found.
+
+Rationale: discovered empirically — `UsefulSensors/moonshine-streaming-medium` produces
+*different transcriptions for identical audio* (3/20 mismatches under `transformers`, 1/25
+under the official ONNX runtime), while all Whisper-family models pass 25/25. Without this
+gate, a non-reproducible model's WER would have entered the results table indistinguishably
+from valid numbers.
+
+**Failing the gate is not automatic exclusion (amended 2026-08-08).** A model that fails must
+have its instability *quantified* before any number is reported:
+
+1. Re-transcribe a fixed ≥300-utterance subset a second time under identical configuration.
+2. Report: utterance-level disagreement rate, and |ΔWER| between the two passes, per group
+   and overall (`scripts/measure_nondeterminism.py`).
+3. The model is reportable only if the band is small relative to the effect being measured
+   (the accent gap). Every headline number for that model carries the band; the results table
+   marks it non-deterministic.
+4. If the band is comparable to the gap, the model is excluded — its numbers cannot support
+   the claim.
+
+Moonshine diagnosis: instability persists with a freshly constructed transcriber and freshly
+loaded weights, and the differing utterance flips between the same two near-equal variants.
+This is run-to-run floating-point nondeterminism (ONNX Runtime reduction order / thread
+scheduling), not accumulated session state — so process isolation cannot fix it and a measured
+band is the correct treatment.
+
 ## 5. Inference protocol
 
 - Greedy decoding everywhere (no beam search) unless a model's documented default differs —
@@ -173,6 +206,30 @@ All WER after text normalization (§4.3).
 - 2026-08-06: Resolved decision 3 (EdAcc marker rules) from raw-data inspection. Spec is frozen
   for accuracy methodology; only decision 4 (load-test concurrency) remains, pending feasibility
   measurements.
+- 2026-08-10: **Determinism gate results — all 7 models assessed.** Deterministic (25/25 identical):
+  whisper-large-v3-turbo, distil-large-v3.5, whisper-small, parakeet-tdt-0.6b-v2,
+  parakeet-tdt-0.6b-v3, canary-qwen-2.5b. Failing: moonshine-streaming-medium, band measured
+  per §4.5 at n=300 — 10.0% utterance disagreement, |ΔWER| 0.21 points overall, worst audited
+  group 1.02 points (Irish English). Band is ~1–2% of the accent gaps being measured (13–23
+  points), so Moonshine is REPORTABLE with the band attached to every headline number and a
+  non-deterministic marker in the results table. Note: the n=300 run predates restricting the
+  sample to audited groups; re-run before writeup so the published band excludes pooled groups.
+- 2026-08-10: **NeMo long-audio chunking at 120 s.** EdAcc test index 3277 is 536 s; Conformer
+  relative-attention memory grows ~O(T²) and this utterance reliably faults the GPU driver on
+  8 GB (199 s succeeds, 536 s does not — reproduced twice at the identical index). Utterances
+  over 120 s are split, transcribed independently, and joined; 16/9177 (0.17%) are affected.
+  Recorded per utterance (`meta.chunked`) and reported per group in each summary, because long
+  turns cluster by speaker and therefore by accent. Comparability note: Whisper-family models
+  processed these same utterances with their native sequential long-form decoding (full
+  context), so NeMo models are mildly disadvantaged on the affected 0.17%.
+- 2026-08-08: **Added §4.5 determinism gate.** Moonshine Streaming (transformers) fails it:
+  identical audio yields different transcriptions depending on process state (3/20 sampled
+  utterances differed between mid-run and fresh-process transcription), and separately triggers
+  a CUDA index assert after several hundred sequential calls. Isolation work ruled out audio
+  duration (0.05 s–60 s all pass), per-utterance content (all 16 crash-region utterances pass
+  individually), and attention backend (SDPA and eager both affected). Whisper-family models
+  pass the gate 25/25 each (turbo, distil-large-v3.5, whisper-small) — their results stand.
+  Moonshine transcripts produced before this date are discarded as contaminated.
 - 2026-08-08: Corrected HF-backend dtype to model-card defaults per §5 (was uniformly bf16 —
   implementation error): Whisper family fp16, Moonshine fp32. A/B on 60 loop-flagged
   whisper-small utterances: 57/60 loops persist at fp16 — loop behavior is real, not

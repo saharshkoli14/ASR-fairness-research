@@ -1,0 +1,120 @@
+{
+  "model": "moonshine-streaming-medium",
+  "n_utterances": 300,
+  "disagreement_rate": 0.1,
+  "wer_pass1": 0.2458,
+  "wer_pass2": 0.2436,
+  "abs_delta_wer": 0.0021,
+  "per_group": {
+    "Bulgarian": {
+      "n": 1,
+      "disagreement_rate": 1.0,
+      "abs_delta_wer": 0.006
+    },
+    "Catalan": {
+      "n": 5,
+      "disagreement_rate": 0.2,
+      "abs_delta_wer": 0.0058
+    },
+    "Chinese": {
+      "n": 6,
+      "disagreement_rate": 0.0,
+      "abs_delta_wer": 0.0
+    },
+    "Don't know": {
+      "n": 3,
+      "disagreement_rate": 0.0,
+      "abs_delta_wer": 0.0
+    },
+    "Eastern European": {
+      "n": 2,
+      "disagreement_rate": 0.0,
+      "abs_delta_wer": 0.0
+    },
+    "French": {
+      "n": 1,
+      "disagreement_rate": 1.0,
+      "abs_delta_wer": 0.5
+    },
+    "Indian English": {
+      "n": 29,
+      "disagreement_rate": 0.069,
+      "abs_delta_wer": 0.0048
+    },
+    "Indonesian": {
+      "n": 2,
+      "disagreement_rate": 0.0,
+      "abs_delta_wer": 0.0
+    },
+    "Irish English": {
+      "n": 15,
+      "disagreement_rate": 0.2667,
+      "abs_delta_wer": 0.0102
+    },
+    "Israeli": {
+      "n": 7,
+      "disagreement_rate": 0.0,
+      "abs_delta_wer": 0.0
+    },
+    "Italian": {
+      "n": 11,
+      "disagreement_rate": 0.0,
+      "abs_delta_wer": 0.0
+    },
+    "Jamaican English": {
+      "n": 15,
+      "disagreement_rate": 0.0,
+      "abs_delta_wer": 0.0
+    },
+    "Kenyan English": {
+      "n": 38,
+      "disagreement_rate": 0.1579,
+      "abs_delta_wer": 0.0169
+    },
+    "Latin American": {
+      "n": 3,
+      "disagreement_rate": 0.0,
+      "abs_delta_wer": 0.0
+    },
+    "Lithuanian": {
+      "n": 19,
+      "disagreement_rate": 0.1579,
+      "abs_delta_wer": 0.0055
+    },
+    "Mainstream US English": {
+      "n": 25,
+      "disagreement_rate": 0.04,
+      "abs_delta_wer": 0.0017
+    },
+    "Nigerian English": {
+      "n": 47,
+      "disagreement_rate": 0.1064,
+      "abs_delta_wer": 0.0038
+    },
+    "Romanian": {
+      "n": 13,
+      "disagreement_rate": 0.0,
+      "abs_delta_wer": 0.0
+    },
+    "Scottish English": {
+      "n": 7,
+      "disagreement_rate": 0.1429,
+      "abs_delta_wer": 0.0235
+    },
+    "Southern British English": {
+      "n": 2,
+      "disagreement_rate": 0.0,
+      "abs_delta_wer": 0.0
+    },
+    "Spanish": {
+      "n": 29,
+      "disagreement_rate": 0.069,
+      "abs_delta_wer": 0.004
+    },
+    "Vietnamese": {
+      "n": 20,
+      "disagreement_rate": 0.15,
+      "abs_delta_wer": 0.0072
+    }
+  }
+}

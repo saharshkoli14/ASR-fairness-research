@@ -17,8 +17,13 @@ MODELS = {
     "parakeet-tdt-0.6b-v3": ("nvidia/parakeet-tdt-0.6b-v3", "nemo", {"kind": "asr", "track_language": True}),
     "whisper-large-v3-turbo": ("openai/whisper-large-v3-turbo", "hf", {"language": "en", "dtype": "float16"}),
     "distil-large-v3.5": ("distil-whisper/distil-large-v3.5", "hf", {"language": "en", "dtype": "float16"}),
-    "moonshine-streaming-medium": ("UsefulSensors/moonshine-streaming-medium", "hf",
-                                   {"sdpa": True, "dtype": "float32", "pad_to_multiple": 80}),
+    # transformers path retained for the determinism bug report only — NOT reportable (§4.5).
+    "moonshine-streaming-medium-hf": ("UsefulSensors/moonshine-streaming-medium", "hf",
+                                      {"sdpa": True, "dtype": "float32", "pad_to_multiple": 80,
+                                       "chunk_s": 30.0}),
+    # Official ONNX runtime — the reportable Moonshine configuration.
+    "moonshine-streaming-medium": ("UsefulSensors/moonshine-streaming-medium", "moonshine",
+                                   {"arch": "MEDIUM_STREAMING", "language": "en"}),
     "whisper-small": ("openai/whisper-small", "hf", {"language": "en", "dtype": "float16"}),
 }
 
@@ -39,6 +44,10 @@ def get_transcriber(name: str, pins: dict):
         from .backends.hf import HFTranscriber
 
         return HFTranscriber(repo_id, revision=revision, **kwargs)
+    if backend == "moonshine":
+        from .backends.moonshine import MoonshineVoiceTranscriber
+
+        return MoonshineVoiceTranscriber(repo_id, revision=revision, **kwargs)
     from .backends.nemo import NeMoTranscriber
 
     return NeMoTranscriber(repo_id, revision=revision, **kwargs)

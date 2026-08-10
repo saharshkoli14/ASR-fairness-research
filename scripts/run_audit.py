@@ -89,6 +89,7 @@ def main():
                         "ref_raw": row["text"],
                         "hyp_raw": res.text,
                         "detected_language": res.detected_language,
+                        "meta": res.meta or None,
                     }
                     fh.write(json.dumps(rec, ensure_ascii=False) + "\n")
                 fh.flush()
@@ -110,12 +111,15 @@ def main():
         audited_groups = {r["accent"] for r in records}
     utts, lang_misdetect = [], 0
     loops: dict[str, list] = {}
+    chunked: dict[str, int] = {}
     for r in records:
         group = r["accent"] if r["accent"] in audited_groups else "other"
         if group == "other":
             continue  # pooled groups: appendix only, never in disparity metrics (EVAL_SPEC §3)
         if r.get("detected_language") and "en" not in r["detected_language"].lower():
             lang_misdetect += 1
+        if (r.get("meta") or {}).get("chunked"):
+            chunked[group] = chunked.get(group, 0) + 1
         ref_n, hyp_n = normalize_reference(r["ref_raw"]), normalize(r["hyp_raw"])
         # Hallucination-loop diagnostic (secondary; WER keeps these — deployed-default behavior):
         # hypothesis blows past 5x the reference length (min 10 words to skip trivial cases).
@@ -135,6 +139,9 @@ def main():
         "n_scored_utterances": len(utts),
         "language_misdetections": lang_misdetect,
         "hallucination_loops_by_group": {g: {"count": len(v), "utt_ids": v} for g, v in loops.items()},
+        # Long-audio chunking is non-random w.r.t. accent (long turns cluster by speaker),
+        # so it is reported per group like exclusions (EVAL_SPEC §5).
+        "chunked_by_group": chunked,
         "metrics": evaluate(utts),
         "bootstrap": {m: bootstrap_ci(utts, metric=m)
                       for m in ("gap_max_minus_min", "worst_group_wer", "macro_wer")},

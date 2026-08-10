@@ -34,12 +34,17 @@ class HFTranscriber:
     # the Whisper family, fp32 for Moonshine (library default; 245M has no memory need).
     def __init__(self, repo_id: str, revision: str, language: str | None = None,
                  sdpa: bool = False, device: str = "cuda:0", batch_size: int = 1,
-                 dtype: str = "float16", pad_to_multiple: int | None = None):
+                 dtype: str = "float16", pad_to_multiple: int | None = None,
+                 chunk_s: float | None = None):
         self.name = repo_id.split("/")[-1]
         self.repo_id = repo_id
         self.revision = revision
         self.batch_size = batch_size
         self.pad_to_multiple = pad_to_multiple
+        # chunk_s: fixed-length chunking for models whose HF implementation fails on
+        # long inputs (Moonshine Streaming + SDPA: CUDA index assert on long audio).
+        # Chunks are transcribed independently and joined with a space. Recorded deviation.
+        self.chunk_s = chunk_s
         # Whisper family (language is set): return_timestamps=True enables the model's
         # documented sequential long-form decoding for >30 s utterances (EVAL_SPEC §5
         # "default chunking"). Applied uniformly to ALL utterances so decoding config is
@@ -63,12 +68,26 @@ class HFTranscriber:
             data = np.pad(data, (0, self.pad_to_multiple - r))  # Moonshine: frame-multiple input
         return {"array": data, "sampling_rate": TARGET_SR}
 
-    def transcribe(self, wav_paths: list[str]) -> list[Transcription]:
-        inputs = [self._prep(p) for p in wav_paths]
+    def _run(self, inputs: list[dict]) -> list[str]:
         kwargs = {"batch_size": self.batch_size}
         if self._return_timestamps:
             kwargs["return_timestamps"] = True
         if self._generate_kwargs:
             kwargs["generate_kwargs"] = self._generate_kwargs
-        outputs = self._pipe(inputs, **kwargs)
-        return [Transcription(text=o["text"]) for o in outputs]
+        return [o["text"] for o in self._pipe(inputs, **kwargs)]
+
+    def transcribe(self, wav_paths: list[str]) -> list[Transcription]:
+        results: list[Transcription] = []
+        for p in wav_paths:
+            inp = self._prep(p)
+            max_len = int(self.chunk_s * TARGET_SR) if self.chunk_s else None
+            if max_len and len(inp["array"]) > max_len:
+                arr = inp["array"]
+                pieces = [{"array": arr[i:i + max_len], "sampling_rate": TARGET_SR}
+                          for i in range(0, len(arr), max_len)]
+                texts = self._run(pieces)
+                results.append(Transcription(text=" ".join(t.strip() for t in texts),
+                                             meta={"chunked": len(pieces)}))
+            else:
+                results.append(Transcription(text=self._run([inp])[0]))
+        return results

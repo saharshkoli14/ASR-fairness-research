@@ -5,15 +5,14 @@
   "dataset_revision": "d9ae7bd344f0562b766ec93ee5ce8f2f9568ce66",
   "split": "test",
   "limit": null,
-  "harness_commit": "83085236bc1ff48647a12c4f193e2bdaebb5cd97",
+  "harness_commit": "298d587e84c6051260961dc95c40b310b86a25cf",
   "normalizer_source": "5f86d1d86363843179951550570367b37c5d6f78",
   "n_scored_utterances": 5087,
   "language_misdetections": 0,
   "hallucination_loops_by_group": {
     "Nigerian English": {
-      "count": 3,
+      "count": 2,
       "utt_ids": [
-        "test-1717",
         "test-1966",
         "test-2143"
       ]
@@ -32,59 +31,58 @@
       ]
     },
     "Mainstream US English": {
-      "count": 2,
+      "count": 1,
       "utt_ids": [
-        "test-8983",
-        "test-9007"
+        "test-8983"
       ]
     }
   },
   "metrics": {
-    "micro_wer": 0.20323265589114703,
-    "macro_wer": 0.19965265887878042,
-    "worst_group_wer": 0.27875857415945127,
+    "micro_wer": 0.1991810027299909,
+    "macro_wer": 0.19815654312679815,
+    "worst_group_wer": 0.28426852580681433,
     "worst_group": "Vietnamese",
-    "gap_max_minus_min": 0.17369383067477662,
-    "std_across_groups": 0.06313204416992285,
+    "gap_max_minus_min": 0.17912182854407052,
+    "std_across_groups": 0.06394772153867258,
     "per_group": {
       "Mainstream US English": {
-        "wer": 0.1862557642559892,
+        "wer": 0.17332133618265663,
         "n_utterances": 875,
         "n_speakers": 9,
         "ref_words": 17782
       },
       "Spanish": {
-        "wer": 0.25530222693531285,
+        "wer": 0.2568045245669848,
         "n_utterances": 852,
         "n_speakers": 5,
         "ref_words": 11316
       },
       "Indian English": {
-        "wer": 0.10506474348467465,
+        "wer": 0.10514669726274381,
         "n_utterances": 627,
         "n_speakers": 3,
         "ref_words": 12202
       },
       "Nigerian English": {
-        "wer": 0.23448533532598542,
+        "wer": 0.22529422753596115,
         "n_utterances": 1351,
         "n_speakers": 5,
         "ref_words": 26765
       },
       "Irish English": {
-        "wer": 0.11269133421718694,
+        "wer": 0.11498131854887308,
         "n_utterances": 350,
         "n_speakers": 3,
         "ref_words": 8297
       },
       "Jamaican English": {
-        "wer": 0.22501063377286262,
+        "wer": 0.2272791719835531,
         "n_utterances": 455,
         "n_speakers": 4,
         "ref_words": 7053
       },
       "Vietnamese": {
-        "wer": 0.27875857415945127,
+        "wer": 0.28426852580681433,
         "n_utterances": 577,
         "n_speakers": 6,
         "ref_words": 8893
@@ -94,25 +92,25 @@
   "bootstrap": {
     "gap_max_minus_min": {
       "metric": "gap_max_minus_min",
-      "point": 0.17369383067477662,
-      "ci_low": 0.13109392571923303,
-      "ci_high": 0.2854101829783915,
+      "point": 0.17912182854407052,
+      "ci_low": 0.13100616649205815,
+      "ci_high": 0.2980416937812733,
       "n_boot": 1000,
       "seed": 3407
     },
     "worst_group_wer": {
       "metric": "worst_group_wer",
-      "point": 0.27875857415945127,
-      "ci_low": 0.24324559108168556,
-      "ci_high": 0.3712739966009533,
+      "point": 0.28426852580681433,
+      "ci_low": 0.24195868854418262,
+      "ci_high": 0.3883345322303481,
       "n_boot": 1000,
       "seed": 3407
     },
     "macro_wer": {
       "metric": "macro_wer",
-      "point": 0.19965265887878042,
-      "ci_low": 0.1735275267722767,
-      "ci_high": 0.22621875965739552,
+      "point": 0.19815654312679815,
+      "ci_low": 0.17127298154742646,
+      "ci_high": 0.22495067926462414,
       "n_boot": 1000,
       "seed": 3407
     }

@@ -1,7 +1,7 @@
 {
-  "model": "distil-large-v3.5",
-  "repo_id": "distil-whisper/distil-large-v3.5",
-  "model_revision": "728a7691f3ff1d3d971528d3203a6e9559165d41",
+  "model": "parakeet-tdt-0.6b-v2",
+  "repo_id": "nvidia/parakeet-tdt-0.6b-v2",
+  "model_revision": "ae9ad07059c7c739ffaf932226a8fe64ae2620b0",
   "dataset_revision": "d9ae7bd344f0562b766ec93ee5ce8f2f9568ce66",
   "split": "test",
   "limit": null,
@@ -9,97 +9,59 @@
   "normalizer_source": "5f86d1d86363843179951550570367b37c5d6f78",
   "n_scored_utterances": 5087,
   "language_misdetections": 0,
-  "hallucination_loops_by_group": {
-    "Nigerian English": {
-      "count": 2,
-      "utt_ids": [
-        "test-1547",
-        "test-2343"
-      ]
-    },
-    "Spanish": {
-      "count": 4,
-      "utt_ids": [
-        "test-2616",
-        "test-2644",
-        "test-2702",
-        "test-5774"
-      ]
-    },
-    "Mainstream US English": {
-      "count": 4,
-      "utt_ids": [
-        "test-6130",
-        "test-6182",
-        "test-8778",
-        "test-9147"
-      ]
-    },
-    "Irish English": {
-      "count": 1,
-      "utt_ids": [
-        "test-6745"
-      ]
-    },
-    "Jamaican English": {
-      "count": 1,
-      "utt_ids": [
-        "test-7251"
-      ]
-    },
-    "Vietnamese": {
-      "count": 1,
-      "utt_ids": [
-        "test-8447"
-      ]
-    }
+  "hallucination_loops_by_group": {},
+  "chunked_by_group": {
+    "Indian English": 3,
+    "Nigerian English": 2,
+    "Irish English": 1,
+    "Jamaican English": 1
   },
   "metrics": {
-    "micro_wer": 0.1845560514798284,
-    "macro_wer": 0.18499793701369271,
-    "worst_group_wer": 0.2584054874620488,
+    "micro_wer": 0.165760280799064,
+    "macro_wer": 0.16500698502936897,
+    "worst_group_wer": 0.2359158889013831,
     "worst_group": "Vietnamese",
-    "gap_max_minus_min": 0.15325879019930497,
-    "std_across_groups": 0.052283840483551274,
+    "gap_max_minus_min": 0.13978410722624787,
+    "std_across_groups": 0.04576974487779126,
     "per_group": {
       "Mainstream US English": {
-        "wer": 0.16814756495332359,
+        "wer": 0.14739624339219434,
         "n_utterances": 875,
         "n_speakers": 9,
         "ref_words": 17782
       },
       "Spanish": {
-        "wer": 0.20440084835630964,
+        "wer": 0.1800989749027925,
         "n_utterances": 852,
         "n_speakers": 5,
         "ref_words": 11316
       },
       "Indian English": {
-        "wer": 0.10514669726274381,
+        "wer": 0.09613178167513522,
         "n_utterances": 627,
         "n_speakers": 3,
         "ref_words": 12202
       },
       "Nigerian English": {
-        "wer": 0.20594059405940593,
+        "wer": 0.1896133009527368,
         "n_utterances": 1351,
         "n_speakers": 5,
         "ref_words": 26765
       },
       "Irish English": {
-        "wer": 0.12112811859708328,
+        "wer": 0.1113655538146318,
         "n_utterances": 350,
         "n_speakers": 3,
         "ref_words": 8297
       },
       "Jamaican English": {
-        "wer": 0.23181624840493406,
+        "wer": 0.1945271515667092,
         "n_utterances": 455,
         "n_speakers": 4,
         "ref_words": 7053
       },
       "Vietnamese": {
-        "wer": 0.2584054874620488,
+        "wer": 0.2359158889013831,
         "n_utterances": 577,
         "n_speakers": 6,
         "ref_words": 8893
@@ -109,25 +71,25 @@
   "bootstrap": {
     "gap_max_minus_min": {
       "metric": "gap_max_minus_min",
-      "point": 0.15325879019930497,
-      "ci_low": 0.10255620255170739,
-      "ci_high": 0.28985154871846064,
+      "point": 0.13978410722624787,
+      "ci_low": 0.09188450315602716,
+      "ci_high": 0.23875938742469505,
       "n_boot": 1000,
       "seed": 3407
     },
     "worst_group_wer": {
       "metric": "worst_group_wer",
-      "point": 0.2584054874620488,
-      "ci_low": 0.21150364939984817,
-      "ci_high": 0.38526821457165733,
+      "point": 0.2359158889013831,
+      "ci_low": 0.19244385571918785,
+      "ci_high": 0.32153722978382704,
       "n_boot": 1000,
       "seed": 3407
     },
     "macro_wer": {
       "metric": "macro_wer",
-      "point": 0.18499793701369271,
-      "ci_low": 0.16098798221244298,
-      "ci_high": 0.21305040535689973,
+      "point": 0.16500698502936897,
+      "ci_low": 0.1451077508848428,
+      "ci_high": 0.18631269370417056,
       "n_boot": 1000,
       "seed": 3407
     }
