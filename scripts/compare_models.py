@@ -38,6 +38,10 @@ def main():
     ap.add_argument("--metric", default="gap_max_minus_min",
                     choices=["gap_max_minus_min", "worst_group_wer", "macro_wer"])
     ap.add_argument("--models", nargs="*")
+    ap.add_argument("--alpha", type=float, default=0.05,
+                    help="family-wise alpha; use 0.05/n_comparisons for Bonferroni")
+    ap.add_argument("--bonferroni", action="store_true",
+                    help="divide alpha by the number of comparisons actually run")
     args = ap.parse_args()
 
     groups = set(json.loads((ROOT / "groups.json").read_text())["groups"])
@@ -48,9 +52,14 @@ def main():
     print(f"models: {models}\nmetric: {args.metric}\n")
 
     utts = {m: load_utts(m, groups) for m in models}
+    pairs = list(combinations(models, 2))
+    alpha = args.alpha / len(pairs) if args.bonferroni else args.alpha
+    if args.bonferroni:
+        print(f"Bonferroni: {len(pairs)} comparisons, per-test alpha = {alpha:.5f} "
+              f"({100 * (1 - alpha):.2f}% CIs)\n")
     results = []
-    for a, b in combinations(models, 2):
-        r = paired_bootstrap(utts[a], utts[b], metric=args.metric)
+    for a, b in pairs:
+        r = paired_bootstrap(utts[a], utts[b], metric=args.metric, alpha=alpha)
         r["model_a"], r["model_b"] = a, b
         results.append(r)
         verdict = "SUPPORTED" if r["significant"] else "not supported (CI includes 0)"

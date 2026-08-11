@@ -122,6 +122,16 @@ All WER after text normalization (§4.3).
 ### 4.4 Statistical comparisons
 - Model A vs model B on gap/worst-group: paired bootstrap over speakers, report CI of the
   difference. No claim of "X is less fair than Y" without a CI excluding zero.
+- **Multiplicity (added 2026-08-10, before any comparison was published).** All-pairs testing
+  over 7 models is 21 comparisons per metric; at α=0.05 roughly one false positive per metric
+  is expected. Therefore:
+  1. **Primary comparisons** are pre-specified and Bonferroni-corrected within their family:
+     (a) each efficiency-generation model vs `whisper-large-v3-turbo` as the incumbent baseline,
+     (b) `parakeet-tdt-0.6b-v2` vs `v3` (the multilingual-upgrade question).
+  2. All other pairs are **exploratory**, reported with uncorrected CIs and labelled as such.
+  3. `whisper-small` is excluded from the comparison family — it is the fine-tuning base, not a
+     deployed candidate, and its >100% group WERs make its CIs uninterpretable.
+  Run corrected: `python scripts/compare_models.py --bonferroni`.
 
 ## 4.5 Determinism gate (added 2026-08-08 — required before any model's numbers are reported)
 
