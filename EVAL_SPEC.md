@@ -222,6 +222,23 @@ band is the correct treatment.
 - 2026-08-06: Resolved decision 3 (EdAcc marker rules) from raw-data inspection. Spec is frozen
   for accuracy methodology; only decision 4 (load-test concurrency) remains, pending feasibility
   measurements.
+- 2026-08-11: **Part 3 data decisions frozen (§6), before any training run.** AfriSpeech-200 groups
+  frozen in `groups_afrispeech.json` by applying §3's rule (≥20 min, ≥3 speakers) to train **and**
+  test independently: 38 accents qualify in train, 11 in test, **5 in both** (hausa, igbo, swahili,
+  yoruba, zulu; 102.2 h train, 59% of the split). Test is the binding constraint. Two amendments:
+  1. **Train subsampled to ~25 h, proportionally** (seed 3407, speaker-stratified), preserving the
+     11.7× Yoruba:Zulu imbalance. Balancing the groups would delete the phenomenon Group-DRO is
+     being tested on; the subsample keeps it while making a 4-run sweep feasible on an 8 GB laptop
+     (~3–5 h/run vs 12–20 h at full size). Both arms use the identical subsample — §6 requires
+     equal budgets, and a budget difference would confound the ERM/DRO comparison.
+  2. **Validation augmented for thin groups.** Hausa's dev split is 15.4 min, below the threshold
+     its own group was selected by, and §6 selects the DRO arm on validation *worst-group* WER —
+     i.e. precisely where the estimate is weakest. Any group with <20 min dev receives a
+     **speaker-disjoint** holdout from train until it reaches 20 min (only hausa qualifies); held-out
+     speakers are excluded from training. Alternative considered and rejected: selecting DRO by mean
+     WER, which §6 already warns sandbags DRO.
+  Audio is resampled 44.1 kHz → 16 kHz mono once and cached (Whisper's required rate; caching avoids
+  re-resampling every epoch and keeps the working set ~3 GB against 32 GB of source tarballs).
 - 2026-08-11: **Cross-environment scoring verified; the headline table is internally comparable.**
   Per-run provenance revealed that the audit spans two environments carrying **different major
   versions of jiwer** — 3.1.0 under WSL2 (NeMo models) and 4.0.0 on native Windows (HF models) —

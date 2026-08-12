@@ -1,0 +1,165 @@
+{
+  "dataset": "intronhealth/afrispeech-200",
+  "dataset_revision": "b538c6e111914a812af28ff677f8cffc9b404b7d",
+  "rule": {
+    "min_minutes": 20.0,
+    "min_speakers": 3,
+    "applied_to": "train AND test independently"
+  },
+  "groups": {
+    "hausa": {
+      "train": {
+        "minutes": 1125.15,
+        "n_speakers": 176,
+        "n_utterances": 5437
+      },
+      "test": {
+        "minutes": 38.19,
+        "n_speakers": 53,
+        "n_utterances": 196
+      },
+      "dev": {
+        "minutes": 15.37,
+        "n_speakers": 19,
+        "n_utterances": 116
+      }
+    },
+    "igbo": {
+      "train": {
+        "minutes": 1456.91,
+        "n_speakers": 246,
+        "n_utterances": 8083
+      },
+      "test": {
+        "minutes": 54.68,
+        "n_speakers": 94,
+        "n_utterances": 355
+      },
+      "dev": {
+        "minutes": 35.5,
+        "n_speakers": 34,
+        "n_utterances": 216
+      }
+    },
+    "swahili": {
+      "train": {
+        "minutes": 804.55,
+        "n_speakers": 46,
+        "n_utterances": 5480
+      },
+      "test": {
+        "minutes": 79.86,
+        "n_speakers": 61,
+        "n_utterances": 521
+      },
+      "dev": {
+        "minutes": 46.67,
+        "n_speakers": 12,
+        "n_utterances": 313
+      }
+    },
+    "yoruba": {
+      "train": {
+        "minutes": 2527.0,
+        "n_speakers": 454,
+        "n_utterances": 14369
+      },
+      "test": {
+        "minutes": 107.5,
+        "n_speakers": 172,
+        "n_utterances": 648
+      },
+      "dev": {
+        "minutes": 55.08,
+        "n_speakers": 57,
+        "n_utterances": 361
+      }
+    },
+    "zulu": {
+      "train": {
+        "minutes": 216.02,
+        "n_speakers": 16,
+        "n_utterances": 1306
+      },
+      "test": {
+        "minutes": 28.37,
+        "n_speakers": 24,
+        "n_utterances": 175
+      },
+      "dev": {
+        "minutes": 58.46,
+        "n_speakers": 12,
+        "n_utterances": 310
+      }
+    }
+  },
+  "pooled_into_other": [
+    "afemai",
+    "afrikaans",
+    "akan",
+    "akan (fante)",
+    "alago",
+    "ateso",
+    "bekwarra",
+    "benin",
+    "bette",
+    "borana",
+    "chichewa",
+    "damara",
+    "dholuo",
+    "ebira",
+    "edo",
+    "efik",
+    "epie",
+    "esan",
+    "etsako",
+    "fulani",
+    "hausa/fulani",
+    "ibibio",
+    "idoma",
+    "igala",
+    "ijaw",
+    "ikwere",
+    "isindebele",
+    "isixhosa",
+    "isizulu",
+    "isoko",
+    "izon",
+    "kagoma",
+    "kikuyu",
+    "kinyarwanda",
+    "kiswahili",
+    "luganda",
+    "luganda and kiswahili",
+    "luhya",
+    "luo",
+    "luo, swahili",
+    "meru",
+    "nasarawa eggon",
+    "nembe",
+    "ngas",
+    "nupe",
+    "ogoni",
+    "okrika",
+    "pidgin",
+    "portuguese",
+    "sepedi",
+    "sesotho",
+    "setswana",
+    "shona",
+    "siswati",
+    "sotho",
+    "south african english",
+    "southern sotho",
+    "swahili ,luganda ,arabic",
+    "tiv",
+    "tshivenda",
+    "tswana",
+    "twi",
+    "urhobo",
+    "venda",
+    "venda and xitsonga",
+    "xhosa"
+  ],
+  "train_hours_audited": 102.16
+}
