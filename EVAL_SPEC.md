@@ -92,6 +92,12 @@ All WER after text normalization (§4.3).
 - **RTFx**: audio-seconds transcribed per wall-clock second, batch 1 *and* max batch that fits.
 - **Latency under load**: closed-loop client at concurrency 1, 2, 4; report TTFT (streaming models
   only) and end-to-end latency at p50/p95/p99. No zero-load averages anywhere in the results.
+- **Service model (added 2026-08-11)**: one model instance, serving one request at a time —
+  every backend serializes its model call on a per-instance lock. Concurrency is offered load,
+  not parallel execution, so the reported figures are queueing latencies. This is what a single
+  GPU actually provides, and holding it identical across backends is what makes the numbers
+  comparable between models. A run in which any request raises is **discarded, not reported**:
+  a sweep that lost workers measures an unknown offered load.
 - **Peak VRAM**: `torch.cuda.max_memory_allocated()` + `nvidia-smi` sampled at 1 Hz; report max.
 - **Thermal protocol**: 5-min warmup before timing; report GPU clock at start and end of each
   timing run; if clock drops > 10%, note throttling in the run log. Timing runs happen with the
@@ -216,6 +222,61 @@ band is the correct treatment.
 - 2026-08-06: Resolved decision 3 (EdAcc marker rules) from raw-data inspection. Spec is frozen
   for accuracy methodology; only decision 4 (load-test concurrency) remains, pending feasibility
   measurements.
+- 2026-08-11: **Cross-environment scoring verified; the headline table is internally comparable.**
+  Per-run provenance revealed that the audit spans two environments carrying **different major
+  versions of jiwer** — 3.1.0 under WSL2 (NeMo models) and 4.0.0 on native Windows (HF models) —
+  and `summary.json` records no library versions, so which version produced which row of the
+  headline table is unrecoverable after the fact. If the two disagreed at all, the per-group WERs
+  would not be mutually comparable and every disparity metric built on them would be unsafe.
+  Tested rather than assumed: `scripts/verify_scoring_consistency.py` re-scores all 7 models from
+  the committed `transcripts.jsonl` in a single interpreter (jiwer 4.0.0), replaying the scoring
+  path verbatim. **All 7 reproduce exactly — max |Δ| = 0.00e+00 across every per-group WER,
+  micro/macro, worst-group, gap, std, speaker and word count**, 5,087 utterances each. The jiwer
+  split is therefore harmless, and RESULTS.md's reproducibility claim is now checked, not asserted.
+  The underlying gap (accuracy runs record no library versions) remains open.
+- 2026-08-11: **Throttling verdicts made three-valued; thermal protocol scoped to GPU runs (§4.2).**
+  The >10% clock-drop check fired twice for reasons unrelated to heat. (a) On the CPU-only
+  Moonshine run the sampler watched an *idle* GPU (5–13 W, 210 MHz floor): a transient boost
+  falling back to idle read as a 42.8% "drop". GPU thermal records are now voided when the
+  execution device is not CUDA, and the run is marked thermal-steady-state-unverified — no CPU
+  thermal sampling exists yet, which is a real gap for the one CPU model. (b) Parakeet is fast
+  enough that a batch phase lasts 10–18 s, giving ~10 samples, so the start/end means are two
+  samples each and DVFS jitter dominates — one phase reported a −98.7% "drop" (the clock rose).
+  Verdicts now require ≥30 samples and are otherwise `null` + `throttle_verdict: indeterminate`,
+  distinct from `false`. Applied to the existing runs: no model shows measured throttling;
+  Parakeet v2/v3 and Moonshine are indeterminate on every phase. Supporting evidence that the
+  Parakeet runs were nonetheless at steady state: 71–80 °C with sustained power at the 83 W cap
+  and clocks in the same 2.2–2.5 GHz band as the long, well-sampled Whisper runs. Only the
+  derived verdict was recomputed; sampled clocks, temperatures and power are unchanged.
+  Protocol amendment for any future rerun: extend timing phases to ≥30 s so fast models get a
+  real verdict rather than an absent one.
+- 2026-08-11: **Per-run provenance added to efficiency runs (§5, §7).** `efficiency.json` recorded
+  only GPU, platform and Python version — no harness commit (§7) and no library/CUDA versions
+  (§5). `pins.json`'s `env_at_pin_time` does not substitute: it describes one machine at pin time
+  (Windows, py3.14, torch 2.11+cu128), while the NeMo and Whisper runs execute under WSL2 on a
+  different interpreter and torch build, and Moonshine runs on native Windows CPU. New module
+  `asr_fairness_audit.provenance` records commit + dirty flag + installed versions per run.
+  Runs predating this are stamped by `scripts/stamp_efficiency_provenance.py`, marked
+  `backfilled: true` — versions read post-hoc from an unchanged environment are weaker evidence
+  than values written by the run, and the flag preserves that distinction. Known remaining gap:
+  `summary.json` (accuracy runs) carries `harness_commit` but still no library versions.
+- 2026-08-11: **Efficiency latency runs discarded; service model made explicit (§4.2).** The
+  runtimes are not thread-safe, and the closed-loop harness let a raising request kill its
+  worker. Both NeMo backends therefore lost every worker past the first, on its first request:
+  RNNT `transcribe()` freezes the encoder on entry and calls `unfreeze(partial=True)` on exit,
+  so an interleaved second exit raises `ValueError: Cannot unfreeze partially…`; SALM
+  `generate()` detaches `llm.model.embed_tokens` to splice in audio embeddings, so a concurrent
+  caller raises `AttributeError: 'Qwen3Model' object has no attribute 'embed_tokens'`. The
+  written-out concurrency_2 / concurrency_4 figures for parakeet-tdt-0.6b-v2, -v3 and
+  canary-qwen-2.5b are single-worker numbers with 1 and 3 requests silently dropped (n=119 and
+  n=117 of 120) — invalid, not merely noisy. Fixes: (a) all backends serialize model calls on a
+  per-instance lock (`backends.base.SerializedInference`); (b) `closed_loop` keeps a worker
+  alive after a failed request, counts it, and raises rather than emitting a partial sweep.
+  Consequence: **all 7 efficiency runs are rerun.** The HF/Moonshine runs did not crash, but
+  they were measured with overlapping pipeline calls and so describe a different service model
+  than the reruns; keeping them would compare models under two different definitions of
+  concurrency. Existing `results/*/efficiency.json` are flagged `invalidated` in place. No
+  reported number depended on them (RESULTS.md §Efficiency was still "not yet measured").
 - 2026-08-10: **Determinism gate results — all 7 models assessed.** Deterministic (25/25 identical):
   whisper-large-v3-turbo, distil-large-v3.5, whisper-small, parakeet-tdt-0.6b-v2,
   parakeet-tdt-0.6b-v3, canary-qwen-2.5b. Failing: moonshine-streaming-medium, band measured

@@ -69,8 +69,10 @@ comparisons (α = 0.0033, 99.67% CIs). Whisper-small excluded. Full output in
 ## 3. Findings
 
 **1. Efficiency does not systematically cost accent fairness — but edge optimization does.**
-The two fastest models audited (Parakeet TDT 0.6B, v2 and v3) are simultaneously the most
-accurate *and* significantly fairer than the 809M incumbent. The prediction that the field's
+The two fastest models audited (Parakeet TDT 0.6B, v2 and v3 — 39–42× real time, 2.6× the
+incumbent's throughput at a third of its p95 latency under load, §4) are simultaneously the most
+accurate *and* significantly fairer than the 809M incumbent. They are the entire Pareto frontier:
+every other CUDA model is strictly dominated on both throughput and worst-group WER. The prediction that the field's
 move toward faster models carries a hidden fairness cost is **not supported as a general
 claim**. It is supported for one model: Moonshine Streaming, the most aggressively
 edge-optimized system tested, is significantly less fair than every other usable model.
@@ -106,7 +108,69 @@ worst for 5 of 7). The disparity is a property of the speech, not of any one arc
 
 ---
 
-## 4. Methodological finding
+## 4. Efficiency
+
+RTX 4060 Laptop 8 GB, 83 W cap, AC power, idle machine. 120-clip EdAcc sample (11.8 min of
+audio, seed 3407), 5-minute warmup at load before any timing. **Service model: one model
+instance serving one request at a time** — every backend serializes its model call, so
+concurrency is offered load and the latency figures are queueing latencies (EVAL_SPEC §4.2).
+Transcripts from these runs are never scored.
+
+| Model | Device | RTFx b1 | RTFx best | Peak VRAM | p50 @1 | p95 @1 | p50 @4 | p95 @4 |
+|---|---|---|---|---|---|---|---|---|
+| Parakeet TDT v2 | CUDA | **41.7** | 72.1 (b8) | 2.65 GB | 0.157 s | 0.244 s | 0.584 s | 0.717 s |
+| Parakeet TDT v3 | CUDA | 39.5 | 66.6 (b8) | 2.71 GB | 0.158 s | 0.248 s | 0.609 s | 0.824 s |
+| Distil-Whisper v3.5 | CUDA | 17.9 | 18.6 (b4) | 1.75 GB | 0.288 s | 0.579 s | 1.245 s | 1.982 s |
+| Whisper large-v3-turbo | CUDA | 15.1 | 15.5 (b4) | 1.94 GB | 0.342 s | 0.741 s | 1.485 s | 2.324 s |
+| Whisper-small † | CUDA | 12.4 | 12.4 (b1) | 0.93 GB | 0.335 s | 0.961 s | 1.602 s | 3.666 s |
+| Canary-Qwen 2.5B | CUDA | 7.3 | 7.8 (b8) | 5.18 GB | 0.547 s | 1.850 s | 2.773 s | 5.256 s |
+| Moonshine Streaming ᶜᵖᵘ | CPU-ONNX | 2.1 | 2.4 (b16) | — | 1.828 s | 5.920 s | 8.682 s | 15.636 s |
+
+Peak VRAM is `torch.cuda.max_memory_reserved()` at batch 1, before any batched phase can inflate
+the high-water mark. Whisper large-v3-turbo and whisper-small both **spill past 7.5 GB at batch
+16** — CUDA falls back to system RAM over PCIe and throughput collapses; a real deployment
+failure mode on 8 GB, reported rather than hidden. Canary-Qwen is the largest resident model at
+5.18 GB and the only one whose batch-16 run fits without spilling.
+
+ᶜᵖᵘ Moonshine's official runtime is CPU-only ONNX, so **its throughput is not comparable to the
+CUDA rows** — it is measured on different silicon, not merely a different configuration. Its
+runtime also ignores `batch_size` (b1 through b16 span 1.95–2.35, i.e. the same work four times),
+which incidentally puts the run-to-run noise floor of the CPU path at roughly ±10%.
+
+† Whisper-small is the fine-tuning base, not a deployment candidate; listed for completeness.
+
+**Thermals.** No model shows measured throttling. Parakeet v2/v3 and Moonshine are *indeterminate*
+on every phase, not clean: Parakeet is fast enough that a timing phase lasts 10–18 s (~10 samples
+at 1 Hz), too few for a verdict, and the Moonshine run's GPU record describes an idle card because
+the work ran on CPU. Supporting evidence that the Parakeet runs were at steady state: 71–80 °C
+with sustained power at the 83 W cap and clocks in the same 2.2–2.5 GHz band as the long,
+well-sampled Whisper runs. See EVAL_SPEC changelog 2026-08-11.
+
+### The efficiency–disparity frontier
+
+![Efficiency vs accent disparity](results/frontier.png)
+
+**There is no trade-off to navigate.** The Pareto frontier over (throughput, worst-group WER)
+contains only the two Parakeets; every other CUDA model is *strictly dominated* by Parakeet
+TDT v3, which is simultaneously 2.2× faster than Distil-Whisper, 2.6× faster than the
+incumbent turbo, 5.4× faster than Canary-Qwen — and lower on worst-group WER than all three.
+The two Parakeets trade only against each other: v2 is 5.6% faster, v3 is 1.4 points fairer.
+
+This is the sharpest form of Finding 1. The hypothesis motivating the audit — that the field's
+move toward faster models carries a hidden accent-fairness cost — predicts an upward-sloping
+frontier, where buying speed costs worst-group accuracy. The measured relationship slopes the
+other way: across the CUDA models, throughput and fairness improve together. The one model that
+does fit the hypothesis, Moonshine Streaming, is both the slowest measured and the least fair,
+which is the opposite of a speed-for-fairness trade and instead points at edge/streaming
+*architecture* as the cost driver (§3, Finding 1).
+
+Tail behaviour under load reinforces it. At concurrency 4, Parakeet v3's p95 is 0.82 s against
+turbo's 2.32 s and Canary-Qwen's 5.26 s — the fairest model is also the one that degrades most
+gracefully when queued.
+
+---
+
+## 5. Methodological finding
 
 **Max−min gap, the metric the accent-bias literature reports by default, is the statistically
 weakest disparity metric available.** On identical data under identical correction:
@@ -122,7 +186,7 @@ disparity metric**, with the gap secondary. This harness reports both by default
 
 ---
 
-## 5. Limitations
+## 6. Limitations
 
 - **Speaker counts are small.** Indian and Irish English have 3 speakers each, Jamaican 4.
   Per-group WER partly reflects those individuals, not the accent. This is a property of
@@ -146,12 +210,25 @@ disparity metric**, with the gap secondary. This harness reports both by default
   disparities, making these figures a lower bound.
 - **Worst/best ratio is post-hoc.** It was computed after seeing results and is exploratory,
   not pre-registered. It is not used for any statistical claim.
-- **Efficiency is not yet measured.** Throughput, tail latency, and VRAM (§4.2) are pending;
-  the efficiency-vs-disparity frontier cannot be drawn until they exist.
+- **Efficiency is measured under one service model, on one machine.** Latency assumes a single
+  model instance serving requests serially (§4); a deployment running several replicas, or
+  batching aggressively at the server, would see different tail behaviour. All figures come from
+  one RTX 4060 Laptop — the *ordering* of models should be stable, the absolute numbers are not
+  portable to datacentre hardware.
+- **Moonshine's throughput is not comparable to the rest.** Its reportable runtime is CPU-only
+  ONNX; the CUDA/CPU boundary, not a configuration choice, separates it from every other row.
+  Its position on the frontier plot is therefore indicative only, and no speed claim in §4 rests
+  on it.
+- **Thermal steady state is unverified for the fastest models.** Parakeet's timing phases are
+  too short (10–18 s) to render a throttling verdict, and the CPU-only Moonshine run has no CPU
+  thermal record at all. Temperature, power and clock-band evidence is consistent with steady
+  state, but the protocol's own check is indeterminate there (EVAL_SPEC §4.2).
+- **Efficiency and accuracy were measured in separate runs**, as the spec requires, so the
+  throughput figures come from a 120-clip sample rather than the full 5,087-utterance test set.
 
 ---
 
-## 6. Reproducing
+## 7. Reproducing
 
 ```bash
 pip install -e ".[dev]"
@@ -161,7 +238,13 @@ python scripts/make_groups.py          # freeze accent groups from the pinned sp
 python scripts/run_audit.py --model parakeet-tdt-0.6b-v3
 python scripts/verify_determinism.py parakeet-tdt-0.6b-v3
 python scripts/compare_models.py --bonferroni --metric worst_group_wer
+python scripts/verify_scoring_consistency.py   # re-score all models in one interpreter
 ```
+
+The audit ran across two environments (NeMo under WSL2, HF on Windows) carrying different major
+versions of jiwer. `verify_scoring_consistency.py` re-scores every model from the committed
+transcripts in a single interpreter; all 7 reproduce exactly (max |Δ| = 0), so the per-group
+WERs in §1 are mutually comparable.
 
 NeMo models (Parakeet, Canary-Qwen) require Linux or WSL2: `pip install "nemo_toolkit[asr]"`.
 Moonshine uses the official ONNX runtime: `pip install moonshine-voice`.

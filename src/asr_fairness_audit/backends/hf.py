@@ -12,7 +12,7 @@ import soxr
 import torch
 from transformers import pipeline
 
-from .base import Transcription
+from .base import SerializedInference, Transcription
 
 TARGET_SR = 16_000
 
@@ -26,7 +26,7 @@ def load_16k_mono(wav_path: str) -> np.ndarray:
     return data
 
 
-class HFTranscriber:
+class HFTranscriber(SerializedInference):
     # batch_size=1 is REQUIRED for accuracy runs: batched padding changes Whisper
     # outputs (6/50 differed on the smoke set), and >30 s utterances only get
     # long-form decoding at batch 1. Do not raise for accuracy. (EVAL_SPEC changelog 2026-08-07.)
@@ -61,6 +61,7 @@ class HFTranscriber:
             device=device,
             model_kwargs=model_kwargs,
         )
+        self._init_inference_lock()
 
     def _prep(self, path: str) -> dict:
         data = load_16k_mono(path)
@@ -74,20 +75,34 @@ class HFTranscriber:
             kwargs["return_timestamps"] = True
         if self._generate_kwargs:
             kwargs["generate_kwargs"] = self._generate_kwargs
-        return [o["text"] for o in self._pipe(inputs, **kwargs)]
+        # One pipeline call at a time (base.SerializedInference). Decode/resample
+        # in _prep stays outside the lock; only the model call is serialized.
+        with self._inference_lock:
+            return [o["text"] for o in self._pipe(inputs, **kwargs)]
 
     def transcribe(self, wav_paths: list[str]) -> list[Transcription]:
-        results: list[Transcription] = []
+        # Flatten to a single pipeline call so batch_size is actually honoured.
+        # (Looping one clip at a time silently defeats batching — it did, until
+        # 2026-08-10; accuracy runs were batch-1 by policy so only the efficiency
+        # benchmark was affected.)
+        max_len = int(self.chunk_s * TARGET_SR) if self.chunk_s else None
+        plan: list[list[dict]] = []
         for p in wav_paths:
             inp = self._prep(p)
-            max_len = int(self.chunk_s * TARGET_SR) if self.chunk_s else None
-            if max_len and len(inp["array"]) > max_len:
-                arr = inp["array"]
-                pieces = [{"array": arr[i:i + max_len], "sampling_rate": TARGET_SR}
-                          for i in range(0, len(arr), max_len)]
-                texts = self._run(pieces)
-                results.append(Transcription(text=" ".join(t.strip() for t in texts),
-                                             meta={"chunked": len(pieces)}))
+            arr = inp["array"]
+            if max_len and len(arr) > max_len:
+                plan.append([{"array": arr[i:i + max_len], "sampling_rate": TARGET_SR}
+                             for i in range(0, len(arr), max_len)])
             else:
-                results.append(Transcription(text=self._run([inp])[0]))
-        return results
+                plan.append([inp])
+
+        flat = [piece for pieces in plan for piece in pieces]
+        texts = self._run(flat)
+
+        out, i = [], 0
+        for pieces in plan:
+            n = len(pieces)
+            joined = " ".join(t.strip() for t in texts[i:i + n] if t)
+            out.append(Transcription(text=joined, meta={"chunked": n} if n > 1 else {}))
+            i += n
+        return out

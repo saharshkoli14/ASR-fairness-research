@@ -9,10 +9,10 @@ from pathlib import Path
 
 import torch
 
-from .base import Transcription
+from .base import SerializedInference, Transcription
 
 
-class NeMoTranscriber:
+class NeMoTranscriber(SerializedInference):
     # batch_size=1 for accuracy runs, same policy as the HF backend (padding must
     # not be able to influence outputs). See EVAL_SPEC changelog 2026-08-07.
     def __init__(self, repo_id: str, revision: str, kind: str = "asr",
@@ -41,6 +41,7 @@ class NeMoTranscriber:
 
             model = ASRModel.from_pretrained(model_name=repo_id)
         self._model = model.to("cuda").eval()
+        self._init_inference_lock()
 
     def _split_if_long(self, wav_path: str, tmpdir: str) -> list[str]:
         """Return [wav_path] or a list of <=chunk_s pieces written into tmpdir."""
@@ -67,11 +68,15 @@ class NeMoTranscriber:
             plan = [(p, self._split_if_long(p, td)) for p in wav_paths]
             flat = [c for _, chunks in plan for c in chunks]
 
+            # Lock covers the model calls only — chunk splitting above is file I/O
+            # on per-call temporaries and must not inflate measured queueing.
             if self.kind == "salm":
-                texts = [self._transcribe_salm(c).text for c in flat]
+                with self._inference_lock:
+                    texts = [self._transcribe_salm(c).text for c in flat]
                 langs = [None] * len(flat)
             else:
-                hyps = self._model.transcribe(flat, batch_size=self.batch_size)
+                with self._inference_lock:
+                    hyps = self._model.transcribe(flat, batch_size=self.batch_size)
                 texts, langs = [], []
                 for h in hyps:
                     texts.append(h.text if hasattr(h, "text") else str(h))

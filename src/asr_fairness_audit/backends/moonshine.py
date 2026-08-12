@@ -16,11 +16,11 @@ results and LIMITATIONS.md:
 
 import numpy as np
 
-from .base import Transcription
+from .base import SerializedInference, Transcription
 from .hf import TARGET_SR, load_16k_mono
 
 
-class MoonshineVoiceTranscriber:
+class MoonshineVoiceTranscriber(SerializedInference):
     def __init__(self, repo_id: str, revision: str, arch: str = "MEDIUM_STREAMING",
                  language: str = "en", max_tokens_per_second: float | None = None,
                  model_path: str | None = None, batch_size: int = 1):
@@ -47,6 +47,7 @@ class MoonshineVoiceTranscriber:
             model_arch=self.arch,
             options=options or None,
         )
+        self._init_inference_lock()
 
     def _resolve_model_path(self, mv, language: str) -> str:
         """Locate downloaded model files; the API surface varies, so try known entry points."""
@@ -88,9 +89,11 @@ class MoonshineVoiceTranscriber:
         out = []
         for p in wav_paths:
             audio = load_16k_mono(p)  # same decode/resample path as the HF backend
-            transcript = self._transcriber.transcribe_without_streaming(
-                np.asarray(audio, dtype=np.float32).tolist(), TARGET_SR
-            )
+            # The runtime Transcriber is a single-stream object (base.SerializedInference).
+            with self._inference_lock:
+                transcript = self._transcriber.transcribe_without_streaming(
+                    np.asarray(audio, dtype=np.float32).tolist(), TARGET_SR
+                )
             text = self._text_from_transcript(transcript)
             n_lines = len(getattr(transcript, "lines", []) or [])
             out.append(Transcription(text=text, meta={"vad_lines": n_lines}))

@@ -1,0 +1,178 @@
+{
+  "model": "whisper-small",
+  "repo_id": "openai/whisper-small",
+  "model_revision": "973afd24965f72e36ca33b3055d56a652f456b4d",
+  "backend": "hf",
+  "device": "cuda",
+  "env": {
+    "gpu": [
+      "NVIDIA GeForce RTX 4060 Laptop GPU",
+      "[N/A]",
+      "596.08"
+    ],
+    "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+    "python": "3.12.3",
+    "harness": {
+      "commit": "1bf802f3b61321b2451c681c4d689f7df3d89f02",
+      "dirty": true
+    },
+    "libraries": {
+      "torch": "2.13.0",
+      "transformers": "4.57.6",
+      "datasets": "5.0.1",
+      "huggingface_hub": "0.36.2",
+      "nemo_toolkit": "2.7.3",
+      "soundfile": "0.14.0",
+      "soxr": "1.1.0",
+      "numpy": "2.4.6",
+      "jiwer": "3.1.0"
+    },
+    "cuda": {
+      "torch_cuda": "13.0",
+      "cudnn": 92000,
+      "driver": "596.08"
+    },
+    "executable": "/home/sahar/nemo-env/bin/python",
+    "backfilled": true,
+    "backfilled_at": "2026-08-12T01:24:10.264311+00:00",
+    "backfill_note": "versions captured post-hoc from the interpreter that produced the run; environment asserted unchanged since. Runs after this date self-record."
+  },
+  "n_clips": 120,
+  "audio_seconds": 709.0,
+  "warmup_seconds": 300,
+  "seed": 3407,
+  "rtfx_batch1": 12.37,
+  "batch1_wall_s": 57.3,
+  "gpu_batch1": {
+    "sampled": true,
+    "n_samples": 54,
+    "sm_clock_start_mhz": 2520.0,
+    "sm_clock_end_mhz": 2455.5,
+    "sm_clock_drop_pct": 2.6,
+    "throttled": false,
+    "temp_max_c": 73.0,
+    "power_max_w": 54.56,
+    "mem_max_mib": 1329.0,
+    "throttle_verdict": "measured"
+  },
+  "peak_vram_batch1_gb": 0.93,
+  "rtfx_batch4": 11.96,
+  "gpu_batch4": {
+    "sampled": true,
+    "n_samples": 55,
+    "sm_clock_start_mhz": 2393.2,
+    "sm_clock_end_mhz": 2247.3,
+    "sm_clock_drop_pct": 6.1,
+    "throttled": false,
+    "temp_max_c": 77.0,
+    "power_max_w": 77.88,
+    "mem_max_mib": 2925.0,
+    "throttle_verdict": "measured"
+  },
+  "peak_vram_batch4_gb": 2.49,
+  "spilled_batch4": false,
+  "rtfx_batch8": 9.26,
+  "gpu_batch8": {
+    "sampled": true,
+    "n_samples": 71,
+    "sm_clock_start_mhz": 2247.9,
+    "sm_clock_end_mhz": 2238.2,
+    "sm_clock_drop_pct": 0.4,
+    "throttled": false,
+    "temp_max_c": 78.0,
+    "power_max_w": 80.51,
+    "mem_max_mib": 5503.0,
+    "throttle_verdict": "measured"
+  },
+  "peak_vram_batch8_gb": 5.01,
+  "spilled_batch8": false,
+  "rtfx_batch16": 0.75,
+  "gpu_batch16": {
+    "sampled": true,
+    "n_samples": 847,
+    "sm_clock_start_mhz": 2517.2,
+    "sm_clock_end_mhz": 2514.0,
+    "sm_clock_drop_pct": 0.1,
+    "throttled": false,
+    "temp_max_c": 75.0,
+    "power_max_w": 66.32,
+    "mem_max_mib": 7833.0,
+    "throttle_verdict": "measured"
+  },
+  "peak_vram_batch16_gb": 10.03,
+  "spilled_batch16": true,
+  "latency": {
+    "concurrency_1": {
+      "p50": 0.3345,
+      "p95": 0.9606,
+      "p99": 1.9725,
+      "mean": 0.4999,
+      "min": 0.1337,
+      "max": 7.718,
+      "n": 120,
+      "requests_ok": 120,
+      "requests_issued": 120,
+      "gpu": {
+        "sampled": true,
+        "n_samples": 55,
+        "sm_clock_start_mhz": 2458.6,
+        "sm_clock_end_mhz": 2470.9,
+        "sm_clock_drop_pct": -0.5,
+        "throttled": false,
+        "temp_max_c": 76.0,
+        "power_max_w": 55.9,
+        "mem_max_mib": 7838.0,
+        "throttle_verdict": "measured"
+      }
+    },
+    "concurrency_2": {
+      "p50": 0.7609,
+      "p95": 1.8988,
+      "p99": 7.7248,
+      "mean": 1.0092,
+      "min": 0.2953,
+      "max": 7.9441,
+      "n": 120,
+      "requests_ok": 120,
+      "requests_issued": 120,
+      "gpu": {
+        "sampled": true,
+        "n_samples": 55,
+        "sm_clock_start_mhz": 2402.7,
+        "sm_clock_end_mhz": 2520.0,
+        "sm_clock_drop_pct": -4.9,
+        "throttled": false,
+        "temp_max_c": 72.0,
+        "power_max_w": 62.86,
+        "mem_max_mib": 7846.0,
+        "throttle_verdict": "measured"
+      }
+    },
+    "concurrency_4": {
+      "p50": 1.6024,
+      "p95": 3.6664,
+      "p99": 8.6972,
+      "mean": 1.9791,
+      "min": 0.2237,
+      "max": 9.5238,
+      "n": 120,
+      "requests_ok": 120,
+      "requests_issued": 120,
+      "gpu": {
+        "sampled": true,
+        "n_samples": 55,
+        "sm_clock_start_mhz": 2469.5,
+        "sm_clock_end_mhz": 2462.7,
+        "sm_clock_drop_pct": 0.3,
+        "throttled": false,
+        "temp_max_c": 75.0,
+        "power_max_w": 53.82,
+        "mem_max_mib": 7866.0,
+        "throttle_verdict": "measured"
+      }
+    }
+  },
+  "service_model": "single instance, requests serialized (EVAL_SPEC \u00a74.2)",
+  "peak_vram_allocated_gb": 6.22,
+  "peak_vram_reserved_gb": 10.03
+}
