@@ -109,7 +109,7 @@ def main():
         sample = rng.sample(rows, min(args.audio_sample, len(rows)))
         bad_sr, bad_dur, silent, missing = 0, 0, 0, 0
         for r in sample:
-            p = prep / r["path"]
+            p = prep / r["path"].replace("\\", "/")   # manifest may be Windows-written
             if not p.exists():
                 missing += 1
                 continue

@@ -1,0 +1,74 @@
+{
+  "checkpoint": "results/ft/erm/step16800",
+  "split": "val",
+  "n": 1346,
+  "batch_size": 8,
+  "batch_caveat": "batched padding can change Whisper outputs (EVAL_SPEC 2026-08-07) \u2014 selection only",
+  "normalizer_source": "5f86d1d86363843179951550570367b37c5d6f78",
+  "metrics": {
+    "micro_wer": 0.20970638412498877,
+    "macro_wer": 0.21371436368739602,
+    "worst_group_wer": 0.24436263230556834,
+    "worst_group": "hausa",
+    "gap_max_minus_min": 0.04609611009538417,
+    "std_across_groups": 0.01749601998088133,
+    "per_group": {
+      "yoruba": {
+        "wer": 0.20058489592293136,
+        "n_utterances": 354,
+        "n_speakers": 57,
+        "ref_words": 5813
+      },
+      "hausa": {
+        "wer": 0.24436263230556834,
+        "n_utterances": 159,
+        "n_speakers": 22,
+        "ref_words": 2173
+      },
+      "zulu": {
+        "wer": 0.19826652221018418,
+        "n_utterances": 308,
+        "n_speakers": 12,
+        "ref_words": 5538
+      },
+      "swahili": {
+        "wer": 0.22211482698627488,
+        "n_utterances": 310,
+        "n_speakers": 12,
+        "ref_words": 5173
+      },
+      "igbo": {
+        "wer": 0.20324294101202126,
+        "n_utterances": 215,
+        "n_speakers": 34,
+        "ref_words": 3577
+      }
+    }
+  },
+  "hallucination_loops_by_group": {},
+  "provenance": {
+    "harness": {
+      "commit": "46bd165b1049f83fecdca6e0ef1435c641642ce8",
+      "dirty": true
+    },
+    "libraries": {
+      "torch": "2.13.0",
+      "transformers": "4.57.6",
+      "datasets": "5.0.1",
+      "huggingface_hub": "0.36.2",
+      "nemo_toolkit": "2.7.3",
+      "soundfile": "0.14.0",
+      "soxr": "1.1.0",
+      "numpy": "2.4.6",
+      "jiwer": "3.1.0"
+    },
+    "cuda": {
+      "torch_cuda": "13.0",
+      "cudnn": 92000,
+      "driver": "596.08"
+    },
+    "python": "3.12.3",
+    "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+    "executable": "/home/sahar/nemo-env/bin/python"
+  }
+}

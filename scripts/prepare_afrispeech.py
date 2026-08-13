@@ -224,7 +224,10 @@ def main():
                 sf.write(path, data, TARGET_SR)
                 manifest.append({"split": split, "accent": x["accent"], "speaker": x["speaker"],
                                  "duration": round(len(data) / TARGET_SR, 3),
-                                 "text": x["text"], "path": str(path.relative_to(out_dir))})
+                                 "text": x["text"],
+                                 # posix separators: this manifest is written on Windows
+                                 # and read under WSL for training.
+                                 "path": path.relative_to(out_dir).as_posix()})
                 found.add(key)
                 hits += 1
         print(f"  [{n:3}/{len(tars)}] {tar.name:44} {hits:5} kept  "

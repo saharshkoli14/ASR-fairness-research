@@ -1,0 +1,104 @@
+{
+  "checkpoint": "base",
+  "split": "test",
+  "n": 1889,
+  "batch_size": 1,
+  "batch_caveat": null,
+  "normalizer_source": "5f86d1d86363843179951550570367b37c5d6f78",
+  "metrics": {
+    "micro_wer": 0.35096465104234104,
+    "macro_wer": 0.34887837285299356,
+    "worst_group_wer": 0.39296243461721353,
+    "worst_group": "yoruba",
+    "gap_max_minus_min": 0.09894897375996947,
+    "std_across_groups": 0.04536725993632873,
+    "per_group": {
+      "zulu": {
+        "wer": 0.29401346085724406,
+        "n_utterances": 172,
+        "n_speakers": 24,
+        "ref_words": 2823
+      },
+      "swahili": {
+        "wer": 0.2944247001332741,
+        "n_utterances": 520,
+        "n_speakers": 61,
+        "ref_words": 9004
+      },
+      "igbo": {
+        "wer": 0.3704411253907607,
+        "n_utterances": 355,
+        "n_speakers": 94,
+        "ref_words": 5758
+      },
+      "yoruba": {
+        "wer": 0.39296243461721353,
+        "n_utterances": 646,
+        "n_speakers": 171,
+        "ref_words": 10515
+      },
+      "hausa": {
+        "wer": 0.39255014326647564,
+        "n_utterances": 196,
+        "n_speakers": 53,
+        "ref_words": 2792
+      }
+    }
+  },
+  "hallucination_loops_by_group": {
+    "hausa": 1,
+    "swahili": 1,
+    "yoruba": 2
+  },
+  "provenance": {
+    "harness": {
+      "commit": "46bd165b1049f83fecdca6e0ef1435c641642ce8",
+      "dirty": true
+    },
+    "libraries": {
+      "torch": "2.13.0",
+      "transformers": "4.57.6",
+      "datasets": "5.0.1",
+      "huggingface_hub": "0.36.2",
+      "nemo_toolkit": "2.7.3",
+      "soundfile": "0.14.0",
+      "soxr": "1.1.0",
+      "numpy": "2.4.6",
+      "jiwer": "3.1.0"
+    },
+    "cuda": {
+      "torch_cuda": "13.0",
+      "cudnn": 92000,
+      "driver": "596.08"
+    },
+    "python": "3.12.3",
+    "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+    "executable": "/home/sahar/nemo-env/bin/python"
+  },
+  "bootstrap": {
+    "gap_max_minus_min": {
+      "metric": "gap_max_minus_min",
+      "point": 0.09894897375996947,
+      "ci_low": 0.07491561387099677,
+      "ci_high": 0.19982540667915427,
+      "n_boot": 1000,
+      "seed": 3407
+    },
+    "worst_group_wer": {
+      "metric": "worst_group_wer",
+      "point": 0.39296243461721353,
+      "ci_low": 0.37294904116260147,
+      "ci_high": 0.4718621238199551,
+      "n_boot": 1000,
+      "seed": 3407
+    },
+    "macro_wer": {
+      "metric": "macro_wer",
+      "point": 0.34887837285299356,
+      "ci_low": 0.3264208591397357,
+      "ci_high": 0.37232214072580094,
+      "n_boot": 1000,
+      "seed": 3407
+    }
+  }
+}

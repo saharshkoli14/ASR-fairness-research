@@ -1,0 +1,59 @@
+{
+  "arm": "erm",
+  "criterion": "validation macro_wer",
+  "checkpoint": "results/ft/erm/step4200",
+  "tiebreak": "fewest steps within 0.05 WER points",
+  "tied_with": [
+    "results/ft/erm/step12600"
+  ],
+  "tied_sensitivity": {
+    "step4200": {
+      "worst_group_wer": 0.2508053382420617,
+      "gap_max_minus_min": 0.06030335196542752
+    },
+    "step12600": {
+      "worst_group_wer": 0.2485043718361712,
+      "gap_max_minus_min": 0.05812136932009626
+    }
+  },
+  "validation_metrics": {
+    "micro_wer": 0.2040046691209482,
+    "macro_wer": 0.20920093067450832,
+    "worst_group_wer": 0.2508053382420617,
+    "worst_group": "hausa",
+    "gap_max_minus_min": 0.06030335196542752,
+    "std_across_groups": 0.021370023031699246,
+    "per_group": {
+      "yoruba": {
+        "wer": 0.20454154481334938,
+        "n_utterances": 354,
+        "n_speakers": 57,
+        "ref_words": 5813
+      },
+      "hausa": {
+        "wer": 0.2508053382420617,
+        "n_utterances": 159,
+        "n_speakers": 22,
+        "ref_words": 2173
+      },
+      "zulu": {
+        "wer": 0.19050198627663417,
+        "n_utterances": 308,
+        "n_speakers": 12,
+        "ref_words": 5538
+      },
+      "swahili": {
+        "wer": 0.20278368451575488,
+        "n_utterances": 310,
+        "n_speakers": 12,
+        "ref_words": 5173
+      },
+      "igbo": {
+        "wer": 0.1973720995247414,
+        "n_utterances": 215,
+        "n_speakers": 34,
+        "ref_words": 3577
+      }
+    }
+  }
+}

@@ -222,6 +222,75 @@ band is the correct treatment.
 - 2026-08-06: Resolved decision 3 (EdAcc marker rules) from raw-data inspection. Spec is frozen
   for accuracy methodology; only decision 4 (load-test concurrency) remains, pending feasibility
   measurements.
+- 2026-08-12: **DRO weights made scale-invariant; τ sweep set to {1.0, 0.5, 0.25} (§6).** The
+  stationary softmax above used *absolute* per-group loss, which self-annihilates as training
+  converges: every group's loss shrinks toward zero, so the differences between them shrink too
+  and q drifts to uniform. Measured on the τ=0.3 run — weight ratio 2.79× at step 700, 1.59× at
+  2800, **1.18× by 6300** — i.e. from roughly step 3000 the DRO arm *was* ERM, and every snapshot
+  (4200+) sat in that regime, while the *relative* gap it was supposed to act on was undiminished
+  (hausa 0.16 vs zulu 0.08, a 2× ratio). Left uncorrected, all three arms of the sweep would have
+  been ERM in disguise and the null result would have been an artefact of the weighting rule.
+  Fix: normalise by the current mean loss before the softmax, `q_g ∝ exp((L̄_g / L̄) / τ)`, so the
+  tilt depends on how much *harder* a group is rather than on absolute loss scale — at step 5600
+  that yields 7.9× at τ=0.25 against the 1.4× actually obtained. Sweep re-calibrated to
+  **τ ∈ {1.0, 0.5, 0.25}** for weak/medium/strong tilt under the new parameterisation. Run
+  `dro_tau0.3` discarded at step ~6800; no numbers from it are reported.
+- 2026-08-12: **DRO group weights changed from cumulative to stationary; η sweep replaced by a
+  temperature sweep (§6 deviation).** §6 specifies online exponentiated gradient,
+  `q_g ← q_g · exp(η·L_g)`, with η ∈ {0.01, 0.1, 1.0}. That rule weights by the *running product*
+  of past losses, so its concentration grows without bound in the training horizon. Measured, not
+  assumed: at η=0.01 — the **smallest** value specified — an EMA loss spread of only 0.38 nats
+  drove **q(hausa) = 0.87 at step 1450 of 16,800**, every other group at the 1e-3 floor, with all
+  four snapshots post-collapse. Larger η collapses sooner, so the sweep as written could only ever
+  have produced single-group models, and the ERM-vs-DRO comparison would not have existed.
+  Replacement: `q_g ∝ exp(L̄_g / τ)` over the current per-group EMA loss — stationary, bounded by
+  construction, and self-correcting (a group's weight falls as soon as the model improves on it,
+  which the cumulative form cannot do). Still exactly one extra hyperparameter, as §6 requires;
+  swept over **τ ∈ {1.0, 0.3, 0.1}**, giving max/min weight ratios of 1.5× / 3.5× / 44× at the
+  observed loss spread. Selection remains validation worst-group WER, budgets remain identical to
+  ERM's 16,800 steps. The collapse itself is retained as a Part 3 finding: both failure modes —
+  chasing group *frequency* under natural sampling, then chasing cumulative *history* — are
+  invisible in the Group-DRO literature's usual group-balanced setting.
+- 2026-08-12: **Group-DRO update corrected before the sweep (§6).** The textbook online update
+  `q_g <- q_g * exp(eta * L_g)` touches only the groups present in the batch. That is sound under
+  group-balanced sampling, but this corpus is sampled naturally and is imbalanced 11.5×: Yoruba
+  (46% of utterances) appears in nearly every batch and collects a multiplicative boost each step,
+  while Zulu (4%) is shrunk by renormalisation whenever it is absent. A 300-step probe collapsed
+  to **q(yoruba)=0.87 with Zulu pinned at the floor** — DRO chasing the *largest* group rather
+  than the hardest, i.e. the objective inverted. Fix: maintain an EMA (β=0.95) of per-group loss
+  and reweight **every observed group each step** from it, decoupling update frequency from group
+  frequency. Rejected alternative: group-balanced sampling, which would make the sampler a second
+  difference between arms and confound the ERM/DRO contrast; the EMA leaves the loaders identical
+  so the arms differ only in loss reduction. Also added: renormalisation of weights over the
+  groups present in a batch (keeps DRO on ERM's loss scale, so the shared LR schedule means the
+  same thing in both arms) and a floor q ≥ 1e-3 (the multiplicative update is otherwise absorbing
+  at zero — a starved group can never recover however badly the model does on it). Post-fix probe:
+  q tracks per-group loss, with hausa — the group ERM leaves worst at 24.4% test WER — carrying
+  the highest weight. Known property, not a defect: EG weights by *cumulative* loss, so
+  concentration grows with the training horizon; the η sweep {0.01, 0.1, 1.0} is what tests it.
+- 2026-08-12: **Checkpoint-selection tiebreak added (§6).** The ERM sweep's top two checkpoints
+  differed by **0.0009 WER points** on validation (step4200 20.9201, step12600 20.9210, n=1,346) —
+  the selection criterion does not separate them, and the winner was being decided by filesystem
+  ordering. Rule, stated now rather than after seeing test numbers: within **0.05 WER points**,
+  prefer the checkpoint with **fewest training steps** (cheaper, and less memorised — training
+  loss kept falling for 6 epochs after validation WER flattened). This is not cosmetic: the tied
+  checkpoints disagree on the disparity figures ERM will be compared against (worst-group 25.08
+  vs 24.85, gap 6.03 vs 5.81), so `selected.json` records the tied set and their disparity
+  metrics as an explicit sensitivity note. Both arms use the identical rule.
+  **Budget note:** §6's "identical budgets" governs *training*, not selection — the DRO arm
+  therefore trains the full 16,800 steps with the same snapshot grid, and selects from it by
+  validation worst-group WER. Shortening DRO's training because ERM selected an early checkpoint
+  would break the comparison.
+- 2026-08-12: **Training-time filters on the AfriSpeech subset (§6).** Two model-imposed limits,
+  applied identically to both arms and enforced at dataset construction so a violating sample
+  fails at startup rather than mid-run: (a) **labels > 448 tokens** — Whisper's
+  `max_target_positions`, a hard limit that raised `ValueError` 150 steps into the first ERM
+  attempt; (b) **audio > 30 s** — Whisper's encoder window, so the reference for a longer
+  utterance describes audio the model never sees, and training on those pairs teaches the decoder
+  to invent the tail. Effect: 173 of 8,400 train utterances dropped (2.1%), 24.62 h → 22.00 h,
+  entirely from the audio-length rule (0 exceeded the token limit after it). By group: hausa 65,
+  yoruba 56, igbo 44, swahili 8, **zulu 0** — the smallest group is untouched, so the 11.5×
+  imbalance under test is preserved. Recorded per run in `run_config.json` under `filters`.
 - 2026-08-11: **Part 3 data decisions frozen (§6), before any training run.** AfriSpeech-200 groups
   frozen in `groups_afrispeech.json` by applying §3's rule (≥20 min, ≥3 speakers) to train **and**
   test independently: 38 accents qualify in train, 11 in test, **5 in both** (hausa, igbo, swahili,
