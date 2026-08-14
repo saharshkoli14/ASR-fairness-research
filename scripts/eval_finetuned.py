@@ -119,6 +119,51 @@ def score(ckpt: str, split: str, prep: Path, batch: int, bootstrap: bool, out_di
     return res
 
 
+def select_sweep(run_dirs: list[Path], arm: str, out: Path) -> None:
+    """§6: pick the (hyperparameter, checkpoint) pair, not just the checkpoint.
+
+    The DRO step size is swept on validation worst-group WER, so the winner has to
+    be chosen across tau values as well as across snapshots — selecting the best
+    checkpoint within each run and then eyeballing the three would leave the
+    hyperparameter choice undocumented.
+    """
+    key = "macro_wer" if arm == "erm" else "worst_group_wer"
+    rows = []
+    for d in run_dirs:
+        cfg = json.loads((d / "run_config.json").read_text()) if (d / "run_config.json").exists() else {}
+        for f in sorted(d.glob("eval_val_*.json")):
+            e = json.loads(f.read_text())
+            rows.append({"run": d.name, "tau": cfg.get("dro_eta"), "ckpt": e["checkpoint"],
+                         "steps": int(Path(e["checkpoint"]).name[4:])
+                         if Path(e["checkpoint"]).name.startswith("step") else 10**9,
+                         "m": e["metrics"]})
+    if not rows:
+        sys.exit("no eval_val_*.json found in " + ", ".join(str(d) for d in run_dirs))
+
+    TIE_BAND = 0.0005
+    rows.sort(key=lambda r: (r["m"][key], r["steps"]))
+    best_val = rows[0]["m"][key]
+    tied = [r for r in rows if abs(r["m"][key] - best_val) <= TIE_BAND]
+    best = min(tied, key=lambda r: r["steps"]) if len(tied) > 1 else rows[0]
+
+    print(f"sweep selection for arm={arm} by validation {key}\n")
+    print(f"{'run':16} {'tau':>6} {'ckpt':>10} {'worst':>7} {'macro':>7} {'gap':>7}")
+    for r in rows:
+        mark = "  <- selected" if r is best else ""
+        print(f"{r['run']:16} {str(r['tau']):>6} {Path(r['ckpt']).name:>10} "
+              f"{100 * r['m']['worst_group_wer']:7.2f} {100 * r['m']['macro_wer']:7.2f} "
+              f"{100 * r['m']['gap_max_minus_min']:7.2f}{mark}")
+    out.write_text(json.dumps(
+        {"arm": arm, "criterion": f"validation {key} across sweep",
+         "selected": {"run": best["run"], "tau": best["tau"], "checkpoint": best["ckpt"]},
+         "tiebreak": "fewest steps within 0.05 WER points" if len(tied) > 1 else None,
+         "all": [{"run": r["run"], "tau": r["tau"], "checkpoint": r["ckpt"],
+                  "worst_group_wer": r["m"]["worst_group_wer"],
+                  "macro_wer": r["m"]["macro_wer"],
+                  "gap_max_minus_min": r["m"]["gap_max_minus_min"]} for r in rows]}, indent=2))
+    print(f"\nwrote {out}")
+
+
 def select(run_dir: Path, arm: str) -> None:
     """§6: ERM selected on validation MEAN WER, DRO on validation WORST-GROUP WER.
 
@@ -180,9 +225,14 @@ def main():
     ap.add_argument("--all", action="store_true", help="score every snapshot in the run dir")
     ap.add_argument("--bootstrap", action="store_true", help="speaker-level CIs (slow)")
     ap.add_argument("--select", help="apply §6 selection over a run dir's val evals")
+    ap.add_argument("--select-sweep", nargs="*", metavar="RUN_DIR",
+                    help="select the best (hyperparameter, checkpoint) pair across runs")
     ap.add_argument("--arm", choices=["erm", "dro"], default="erm")
     args = ap.parse_args()
 
+    if args.select_sweep:
+        dirs = [Path(d) for d in args.select_sweep]
+        return select_sweep(dirs, args.arm, dirs[0].parent / f"selected_{args.arm}_sweep.json")
     if args.select:
         return select(Path(args.select), args.arm)
     if not (args.data_dir and args.ckpt):

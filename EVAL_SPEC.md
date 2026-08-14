@@ -222,6 +222,21 @@ band is the correct treatment.
 - 2026-08-06: Resolved decision 3 (EdAcc marker rules) from raw-data inspection. Spec is frozen
   for accuracy methodology; only decision 4 (load-test concurrency) remains, pending feasibility
   measurements.
+- 2026-08-13: **Part 3 result — Group-DRO indistinguishable from ERM (§6).** Sweep complete:
+  τ ∈ {1.0, 0.5, 0.25}, identical 16,800-step budgets, ERM selected on validation mean WER and DRO
+  on validation worst-group WER as §6 requires. Selected pair τ=0.5 / step4200. Paired
+  speaker-level bootstrap on the AfriSpeech test split (403 speakers, 1,889 utterances, 1,000
+  resamples, seed 3407, 99.67% CIs): **Δ worst-group −0.43 [−1.69, +3.48], Δ gap −0.69
+  [−2.30, +3.21], Δ macro +0.33 [−0.41, +1.16]** — all indistinguishable. Corroborating evidence
+  that this is a null rather than an underpowered win: validation worst-group WER is flat across
+  the sweep (24.30 / 24.39 / 25.08 for τ = 0.5 / 0.25 / 1.0) despite weight-tilt ratios spanning
+  1.5×–5×, i.e. no dose-response. Power caveat recorded rather than hidden: the CI half-width is
+  ~2.5 points, so effects smaller than ~2 points are not detectable at this sample size; the claim
+  is "no detectable effect", not "no effect". Paired comparison used because the arms transcribe
+  identical utterances — the unpaired per-arm CIs overlap almost entirely and would be the wrong
+  test. Also noted: ERM's `final` checkpoint won validation worst-group (24.44) but placed
+  second-worst on test (25.93), so validation worst-group WER did not transfer — expected when the
+  worst group's validation set is 159 utterances from 22 speakers.
 - 2026-08-12: **DRO weights made scale-invariant; τ sweep set to {1.0, 0.5, 0.25} (§6).** The
   stationary softmax above used *absolute* per-group loss, which self-annihilates as training
   converges: every group's loss shrinks toward zero, so the differences between them shrink too

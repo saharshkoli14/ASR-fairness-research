@@ -1,0 +1,45 @@
+{
+  "a": "ERM step4200",
+  "b": "DRO tau=0.5 step4200",
+  "a_file": "results/ft/erm/transcripts_test_step4200.jsonl",
+  "b_file": "results/ft/dro_tau0.5/transcripts_test_step4200.jsonl",
+  "n_speakers": 403,
+  "n_utterances": 1889,
+  "n_boot": 1000,
+  "seed": 3407,
+  "paired": true,
+  "metrics": {
+    "worst_group_wer": {
+      "a": 0.2439111747851003,
+      "b": 0.2396131805157593,
+      "delta": -0.004297994269340993,
+      "ci_low": -0.016935616998832944,
+      "ci_high": 0.034768249272299906,
+      "significant": false
+    },
+    "gap_max_minus_min": {
+      "a": 0.09342250308363428,
+      "b": 0.08657008855663004,
+      "delta": -0.006852414527004247,
+      "ci_low": -0.023022336659484267,
+      "ci_high": 0.032139466059847875,
+      "significant": false
+    },
+    "macro_wer": {
+      "a": 0.19699022743084033,
+      "b": 0.20026315697243896,
+      "delta": 0.003272929541598635,
+      "ci_low": -0.004130063867531224,
+      "ci_high": 0.01159458262221258,
+      "significant": false
+    },
+    "micro_wer": {
+      "a": 0.1924122750226596,
+      "b": 0.19717078855367084,
+      "delta": 0.004758513531011255,
+      "ci_low": -0.003720869232593204,
+      "ci_high": 0.01674584968085672,
+      "significant": false
+    }
+  }
+}

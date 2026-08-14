@@ -1,0 +1,60 @@
+{
+  "arm": "dro",
+  "base": "openai/whisper-small",
+  "base_revision": "973afd24965f72e36ca33b3055d56a652f456b4d",
+  "seed": 3407,
+  "steps": 16800,
+  "batch": 4,
+  "grad_accum": 4,
+  "effective_batch": 16,
+  "lr": 1e-05,
+  "dro_eta": 1.0,
+  "groups": [
+    "hausa",
+    "igbo",
+    "swahili",
+    "yoruba",
+    "zulu"
+  ],
+  "n_train": 8227,
+  "train_hours": 21.999,
+  "filters": {
+    "max_audio_s": 30.0,
+    "max_label_tokens": 448,
+    "dropped": {
+      "long_audio": 173,
+      "long_labels": 0,
+      "by_group": {
+        "hausa": 65,
+        "igbo": 44,
+        "swahili": 8,
+        "yoruba": 56
+      }
+    }
+  },
+  "provenance": {
+    "harness": {
+      "commit": "beed2c1686f38a70b16c1662de8e1e8ede61553e",
+      "dirty": true
+    },
+    "libraries": {
+      "torch": "2.13.0",
+      "transformers": "4.57.6",
+      "datasets": "5.0.1",
+      "huggingface_hub": "0.36.2",
+      "nemo_toolkit": "2.7.3",
+      "soundfile": "0.14.0",
+      "soxr": "1.1.0",
+      "numpy": "2.4.6",
+      "jiwer": "3.1.0"
+    },
+    "cuda": {
+      "torch_cuda": "13.0",
+      "cudnn": 92000,
+      "driver": "596.08"
+    },
+    "python": "3.12.3",
+    "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+    "executable": "/home/sahar/nemo-env/bin/python"
+  }
+}

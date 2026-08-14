@@ -1,0 +1,132 @@
+{
+  "arm": "dro",
+  "criterion": "validation worst_group_wer across sweep",
+  "selected": {
+    "run": "dro_tau0.5",
+    "tau": 0.5,
+    "checkpoint": "results/ft/dro_tau0.5/step4200"
+  },
+  "tiebreak": null,
+  "all": [
+    {
+      "run": "dro_tau0.5",
+      "tau": 0.5,
+      "checkpoint": "results/ft/dro_tau0.5/step4200",
+      "worst_group_wer": 0.24298205246203405,
+      "macro_wer": 0.21164389390630034,
+      "gap_max_minus_min": 0.04868808352017778
+    },
+    {
+      "run": "dro_tau0.25",
+      "tau": 0.25,
+      "checkpoint": "results/ft/dro_tau0.25/step4200",
+      "worst_group_wer": 0.24390243902439024,
+      "macro_wer": 0.21032043033692144,
+      "gap_max_minus_min": 0.04816390525768746
+    },
+    {
+      "run": "dro_tau0.25",
+      "tau": 0.25,
+      "checkpoint": "results/ft/dro_tau0.25/step16800",
+      "worst_group_wer": 0.24620340543028071,
+      "macro_wer": 0.2120789882015403,
+      "gap_max_minus_min": 0.05163949694928982
+    },
+    {
+      "run": "dro_tau0.25",
+      "tau": 0.25,
+      "checkpoint": "results/ft/dro_tau0.25/final",
+      "worst_group_wer": 0.24620340543028071,
+      "macro_wer": 0.2120789882015403,
+      "gap_max_minus_min": 0.05163949694928982
+    },
+    {
+      "run": "dro_tau0.5",
+      "tau": 0.5,
+      "checkpoint": "results/ft/dro_tau0.5/step16800",
+      "worst_group_wer": 0.24666359871145882,
+      "macro_wer": 0.21325274638459352,
+      "gap_max_minus_min": 0.04901193530637077
+    },
+    {
+      "run": "dro_tau0.5",
+      "tau": 0.5,
+      "checkpoint": "results/ft/dro_tau0.5/final",
+      "worst_group_wer": 0.24666359871145882,
+      "macro_wer": 0.21325274638459352,
+      "gap_max_minus_min": 0.04901193530637077
+    },
+    {
+      "run": "dro_tau0.5",
+      "tau": 0.5,
+      "checkpoint": "results/ft/dro_tau0.5/step12600",
+      "worst_group_wer": 0.2485043718361712,
+      "macro_wer": 0.21464372860949404,
+      "gap_max_minus_min": 0.053488120481891666
+    },
+    {
+      "run": "dro_tau1.0",
+      "tau": 1.0,
+      "checkpoint": "results/ft/dro_tau1.0/step16800",
+      "worst_group_wer": 0.2508053382420617,
+      "macro_wer": 0.2260338752530719,
+      "gap_max_minus_min": 0.04588501394796049
+    },
+    {
+      "run": "dro_tau1.0",
+      "tau": 1.0,
+      "checkpoint": "results/ft/dro_tau1.0/final",
+      "worst_group_wer": 0.2508053382420617,
+      "macro_wer": 0.2260338752530719,
+      "gap_max_minus_min": 0.04588501394796049
+    },
+    {
+      "run": "dro_tau0.5",
+      "tau": 0.5,
+      "checkpoint": "results/ft/dro_tau0.5/step8400",
+      "worst_group_wer": 0.2567878508973769,
+      "macro_wer": 0.21703313807368002,
+      "gap_max_minus_min": 0.06159102893999155
+    },
+    {
+      "run": "dro_tau0.25",
+      "tau": 0.25,
+      "checkpoint": "results/ft/dro_tau0.25/step12600",
+      "worst_group_wer": 0.25816843074091117,
+      "macro_wer": 0.2127981151426932,
+      "gap_max_minus_min": 0.0638744617990549
+    },
+    {
+      "run": "dro_tau1.0",
+      "tau": 1.0,
+      "checkpoint": "results/ft/dro_tau1.0/step12600",
+      "worst_group_wer": 0.26291079812206575,
+      "macro_wer": 0.22508138739631095,
+      "gap_max_minus_min": 0.06889346516148426
+    },
+    {
+      "run": "dro_tau0.25",
+      "tau": 0.25,
+      "checkpoint": "results/ft/dro_tau0.25/step8400",
+      "worst_group_wer": 0.26369075011504833,
+      "macro_wer": 0.21916620061609643,
+      "gap_max_minus_min": 0.06686879272971066
+    },
+    {
+      "run": "dro_tau1.0",
+      "tau": 1.0,
+      "checkpoint": "results/ft/dro_tau1.0/step8400",
+      "worst_group_wer": 0.30291900251304854,
+      "macro_wer": 0.23659968865601444,
+      "gap_max_minus_min": 0.10049935643143063
+    },
+    {
+      "run": "dro_tau1.0",
+      "tau": 1.0,
+      "checkpoint": "results/ft/dro_tau1.0/step4200",
+      "worst_group_wer": 0.9282814614343707,
+      "macro_wer": 0.8190325350170639,
+      "gap_max_minus_min": 0.2633021701320237
+    }
+  ]
+}
