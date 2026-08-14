@@ -35,7 +35,8 @@ class HFTranscriber(SerializedInference):
     def __init__(self, repo_id: str, revision: str, language: str | None = None,
                  sdpa: bool = False, device: str = "cuda:0", batch_size: int = 1,
                  dtype: str = "float16", pad_to_multiple: int | None = None,
-                 chunk_s: float | None = None):
+                 chunk_s: float | None = None,
+                 processor_id: str | None = None, processor_revision: str | None = None):
         self.name = repo_id.split("/")[-1]
         self.repo_id = repo_id
         self.revision = revision
@@ -53,10 +54,19 @@ class HFTranscriber(SerializedInference):
         self._return_timestamps = bool(language)
         self._generate_kwargs = {"language": language} if language else {}
         model_kwargs = {"attn_implementation": "sdpa"} if sdpa else {}
+        # A fine-tuned checkpoint directory (EVAL_SPEC §6) holds weights and config only —
+        # `model.save_pretrained` writes no tokenizer. Fine-tuning does not alter the
+        # tokenizer or feature extractor, so load those from the pinned base repo and take
+        # only the weights from the checkpoint.
+        extra = {}
+        if processor_id:
+            extra = {"tokenizer": processor_id, "feature_extractor": processor_id}
+            self.processor_id, self.processor_revision = processor_id, processor_revision
         self._pipe = pipeline(
             "automatic-speech-recognition",
             model=repo_id,
             revision=revision,
+            **extra,
             dtype=getattr(torch, dtype),
             device=device,
             model_kwargs=model_kwargs,

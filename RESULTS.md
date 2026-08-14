@@ -170,7 +170,120 @@ gracefully when queued.
 
 ---
 
-## 5. Methodological finding
+## 5. Mitigation — can fine-tuning fix the disparity?
+
+Base: `whisper-small`, full fine-tune. Data: AfriSpeech-200, 5 accent groups meeting the §3
+rule in **both** train and test (hausa, igbo, swahili, yoruba, zulu), subsampled to 22.0 h
+preserving the natural 11.5× group imbalance (seed 3407, speaker-stratified). Arms: **ERM**
+(mean loss) and **Group-DRO** (group-weighted), identical 16,800-step budgets, effective batch
+16, lr 1e-5. ERM selected on validation mean WER, DRO on validation worst-group WER, as §6
+requires. Test split: 1,889 utterances, 403 speakers — an order of magnitude more speakers per
+group than EdAcc offers.
+
+### 5.1 Fine-tuning works, and changes nothing about fairness
+
+Per-group WER (%) on AfriSpeech test, with each group's training hours:
+
+| group | train h | base | ERM | Δ |
+|---|---|---|---|---|
+| yoruba | 10.1 | 39.3 | 21.4 | **−17.9** |
+| igbo | 5.8 | 37.0 | 20.1 | −16.9 |
+| hausa | 4.5 | 39.3 | 24.4 | −14.9 |
+| swahili | 3.3 | 29.4 | 15.0 | −14.4 |
+| zulu | 0.9 | 29.4 | 17.5 | **−11.9** |
+| **macro** | | **34.9** | **19.7** | −15.2 |
+| **gap** | | **9.89** | **9.34** | −0.55 |
+
+WER falls 43% and the disparity does not move: gap 9.89 → 9.34, worst-group 39.3 → 24.4 while
+every other group falls by a similar amount. **The improvement rank-orders perfectly with each
+group's training hours** — no inversions across five groups. That is the ERM failure mode stated
+quantitatively: it distributes gains in proportion to group data, so a fixed relative disparity
+survives a large absolute improvement.
+
+Two things worth noting. Fine-tuning eliminated hallucination loops entirely (4 → 0). And **the
+worst group is not the smallest**: Zulu, with 11× less data than Yoruba, is *better* than it both
+before and after. Group difficulty here is inherited from pretraining, not created by the data
+budget — consistent with §3's Finding 7 that the disparity is a property of the speech.
+
+### 5.2 Group-DRO: no detectable effect
+
+Swept over τ ∈ {1.0, 0.5, 0.25}, weight-tilt ratios 1.5×–5×, identical budgets. Selected pair:
+τ=0.5 / step4200. Paired speaker-level bootstrap against ERM on identical utterances (403
+speakers, 1,000 resamples, seed 3407, 99.67% CIs):
+
+| metric | ERM | DRO | Δ | 99.67% CI | verdict |
+|---|---|---|---|---|---|
+| worst-group WER | 24.39 | 23.96 | −0.43 | [−1.69, +3.48] | indistinguishable |
+| max−min gap | 9.34 | 8.66 | −0.69 | [−2.30, +3.21] | indistinguishable |
+| macro WER | 19.70 | 20.03 | +0.33 | [−0.41, +1.16] | indistinguishable |
+
+Point estimates lean DRO's way on both disparity metrics, but every interval spans zero.
+Corroborating that this is a null rather than an underpowered win: **validation worst-group WER
+is flat across the sweep** (24.30 / 24.39 / 25.08 for τ = 0.5 / 0.25 / 1.0) despite the tilt
+strength varying more than threefold — no dose-response. The comparison is paired because both
+arms transcribe the same utterances; the unpaired per-arm intervals overlap almost entirely and
+would be the wrong test.
+
+**Power bound, stated rather than buried**: the CI half-width is ~2.5 points, so effects larger
+than about 2 points are excluded and smaller ones are not. The claim is *no detectable effect at
+this sample size*, not *Group-DRO does not work*.
+
+### 5.3 Getting Group-DRO to optimise what it claims to
+
+Three separate implementation faults were found by inspecting what the group weights actually
+did, each of which would have produced a plausible-looking null (EVAL_SPEC changelog 2026-08-12):
+
+1. **Frequency capture.** The textbook update `q_g ← q_g·exp(η·L_g)` touches only groups present
+   in the batch — fine under group-balanced sampling, wrong under natural sampling. Yoruba (46%
+   of utterances) collected a boost nearly every step while Zulu (4%) was shrunk by
+   renormalisation in its absence. Result: q(yoruba) = 0.87, Zulu at the floor — DRO chasing the
+   *largest* group rather than the hardest.
+2. **Cumulative collapse.** Exponentiated gradient weights by the running *product* of past
+   losses, so concentration grows with the training horizon. At η=0.01 — the smallest value §6
+   specified — an EMA loss spread of 0.38 nats drove q(hausa) to 0.87 by step 1,450 of 16,800,
+   with every snapshot post-collapse.
+3. **Scale annihilation.** A stationary softmax over *absolute* loss goes uniform as training
+   converges: the weight ratio fell 2.79× → 1.18× between steps 700 and 6,300 while the
+   *relative* gap it should act on was undiminished. From ~step 3,000 that arm simply was ERM.
+
+The final form — a softmax over each group's EMA loss **relative to the current mean**, floored
+at 1e-3 — is stationary, scale-invariant and self-correcting. It departs from the online rule §6
+originally specified; a reader who considers the textbook form the object of study should read
+the null accordingly.
+
+### 5.4 The fix does not transfer — it makes things worse
+
+Both fine-tuned models, evaluated on EdAcc through the identical Part 1 pipeline:
+
+| metric | whisper-small base | ERM-ft | DRO-ft |
+|---|---|---|---|
+| macro WER | 78.5 | 118.9 | 124.6 |
+| worst-group WER | 104.6 | 148.8 | 172.7 |
+| max−min gap | 70.4 | 89.0 | **117.3** |
+| hallucination loops | 401 | 558 | 589 |
+
+**All seven EdAcc groups got worse, and the gap widened by two-thirds.** The DRO arm — the one
+selected for fairness — transferred worse than ERM on every metric.
+
+The likely mechanism is domain specialisation rather than accent specialisation: AfriSpeech is
+short read clinical speech (~10.6 s mean), EdAcc is long-form spontaneous conversation, and the
+loop count rising 401 → 589 is what a model that has lost long-form decoding looks like. Domain,
+utterance length and accent all shift together here, so this cannot be attributed to accent
+overfitting alone.
+
+Two caveats bound the claim. `whisper-small` was already degenerate on EdAcc (80.3% micro, 401
+loops), so this is degradation of a poor model rather than of a deployment candidate — it is the
+fine-tuning base by design, not a system anyone would ship. And one base model on one corpus pair
+cannot establish that fairness fine-tuning generally fails to transfer.
+
+What it does establish is worth stating plainly: **a mitigation that improved worst-group WER
+in-corpus made every accent group worse out-of-corpus, and widened the disparity it was meant to
+close.** Cross-corpus evaluation of accent-fairness interventions is rarely reported; on this
+evidence it should be.
+
+---
+
+## 6. Methodological finding
 
 **Max−min gap, the metric the accent-bias literature reports by default, is the statistically
 weakest disparity metric available.** On identical data under identical correction:
@@ -186,7 +299,7 @@ disparity metric**, with the gap secondary. This harness reports both by default
 
 ---
 
-## 6. Limitations
+## 7. Limitations
 
 - **Speaker counts are small.** Indian and Irish English have 3 speakers each, Jamaican 4.
   Per-group WER partly reflects those individuals, not the accent. This is a property of
@@ -228,7 +341,7 @@ disparity metric**, with the gap secondary. This harness reports both by default
 
 ---
 
-## 7. Reproducing
+## 8. Reproducing
 
 ```bash
 pip install -e ".[dev]"

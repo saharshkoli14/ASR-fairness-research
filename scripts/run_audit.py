@@ -43,6 +43,13 @@ def main():
     ap.add_argument("--model", required=True, choices=MODELS.keys())
     ap.add_argument("--split", default="test")
     ap.add_argument("--limit", type=int, default=None, help="smoke-run on first N utterances")
+    ap.add_argument("--checkpoint", default=None,
+                    help="local fine-tuned weights to score instead of the registry entry "
+                         "(EVAL_SPEC §6 cross-corpus evaluation). Backend and inference kwargs "
+                         "come from --model, so use the model whose architecture matches.")
+    ap.add_argument("--tag", default=None,
+                    help="results/<tag>/ instead of results/<model>/; required with --checkpoint "
+                         "so a fine-tuned run cannot overwrite the base model's audit")
     args = ap.parse_args()
 
     pins = load_pins()
@@ -51,7 +58,10 @@ def main():
     if groups is None and args.limit is None:
         sys.exit("groups.json missing — run scripts/make_groups.py first (smoke runs with --limit are allowed).")
 
-    out_dir = ROOT / "results" / args.model
+    if args.checkpoint and not args.tag:
+        sys.exit("--checkpoint requires --tag: writing fine-tuned results into "
+                 f"results/{args.model}/ would overwrite the base model's audit")
+    out_dir = ROOT / "results" / (args.tag or args.model)
     out_dir.mkdir(parents=True, exist_ok=True)
     tx_file = out_dir / "transcripts.jsonl"
 
@@ -70,7 +80,7 @@ def main():
     print(f"{len(rows)} clean utterances, {len(todo)} to transcribe.")
 
     if todo:
-        transcriber = get_transcriber(args.model, pins)
+        transcriber = get_transcriber(args.model, pins, checkpoint=args.checkpoint)
         t0 = time.time()
         with tx_file.open("a", encoding="utf-8") as fh, tempfile.TemporaryDirectory() as tmp:
             for start in range(0, len(todo), BATCH):
@@ -128,9 +138,13 @@ def main():
         utts.append(Utterance(ref=ref_n, hyp=hyp_n, group=group, speaker=r["speaker"]))
 
     summary = {
-        "model": args.model,
-        "repo_id": MODELS[args.model][0],
-        "model_revision": pins["models"][MODELS[args.model][0]],
+        "model": args.tag or args.model,
+        "base_model": args.model,
+        "repo_id": args.checkpoint or MODELS[args.model][0],
+        # A local checkpoint has no Hub revision; the path and the run that produced
+        # it are the provenance instead (EVAL_SPEC §7).
+        "model_revision": None if args.checkpoint else pins["models"][MODELS[args.model][0]],
+        "checkpoint": args.checkpoint,
         "dataset_revision": pins["datasets"]["edinburghcstr/edacc"],
         "split": args.split,
         "limit": args.limit,

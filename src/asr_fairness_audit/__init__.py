@@ -36,10 +36,23 @@ def load_pins(pins_path: str | Path | None = None) -> dict:
     return json.loads(path.read_text())
 
 
-def get_transcriber(name: str, pins: dict):
-    """Build a Transcriber for a registered model, loading at its pinned revision."""
+def get_transcriber(name: str, pins: dict, checkpoint: str | None = None):
+    """Build a Transcriber for a registered model, loading at its pinned revision.
+
+    `checkpoint` overrides the weights with a local directory (a fine-tuned model
+    from §6) while keeping the registry entry's backend and inference kwargs. The
+    pinned revision no longer identifies those weights, so callers must record the
+    checkpoint path instead — run_audit.py writes it into summary.json.
+    """
     repo_id, backend, kwargs = MODELS[name]
     revision = pins["models"][repo_id]
+    if checkpoint:
+        if backend != "hf":
+            raise ValueError(f"--checkpoint is only supported for the hf backend, not {backend!r}")
+        # Weights from the checkpoint, tokenizer/feature extractor from the pinned base:
+        # snapshot dirs contain no tokenizer, and fine-tuning does not change it.
+        kwargs = {**kwargs, "processor_id": repo_id, "processor_revision": revision}
+        repo_id, revision = checkpoint, None
     if backend == "hf":
         from .backends.hf import HFTranscriber
 
