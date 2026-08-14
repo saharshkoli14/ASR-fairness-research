@@ -237,6 +237,16 @@ band is the correct treatment.
   test. Also noted: ERM's `final` checkpoint won validation worst-group (24.44) but placed
   second-worst on test (25.93), so validation worst-group WER did not transfer — expected when the
   worst group's validation set is 159 utterances from 22 speakers.
+  **Run anomaly, τ=1.0**: a transient fp16 training divergence at step ~3700 (loss 0.47 → 5.80),
+  fully recovered by step 4400 and tracking normally thereafter (0.088 at 8400 vs ERM's 0.051).
+  The step4200 snapshot was captured mid-recovery and is unusable — it scores 92.8% worst-group
+  WER on validation and self-excludes from selection. Not a DRO artefact: group weights were
+  near-uniform throughout (q_max 0.21–0.24), and τ=1.0 is the arm closest to ERM; ERM, τ=0.5 and
+  τ=0.25 show zero loss spikes after step 2000. Not re-run: the seed is fixed at 3407 across all
+  arms, so an identical re-run would likely reproduce the divergence, and re-running with a
+  different seed would break seed-parity with the other three arms — trading one comparability
+  problem for another. τ=1.0's four remaining checkpoints are retained and would not have been
+  selected regardless (best worst-group 25.08 vs τ=0.5's 24.30).
 - 2026-08-12: **DRO weights made scale-invariant; τ sweep set to {1.0, 0.5, 0.25} (§6).** The
   stationary softmax above used *absolute* per-group loss, which self-annihilates as training
   converges: every group's loss shrinks toward zero, so the differences between them shrink too
