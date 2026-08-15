@@ -9,6 +9,10 @@ pinned in [`pins.json`](pins.json). Normalizer vendored from `openai/whisper@5f8
 Decoding: greedy/model-default, batch size 1, each model's documented default precision.
 Every number below is reproducible from the committed `results/<model>/transcripts.jsonl`.
 
+Three parts: **accuracy** (§1–3), **efficiency** on identical hardware (§4), and **mitigation**
+(§5) — full fine-tuning of whisper-small on AfriSpeech-200, ERM versus Group-DRO, evaluated
+in-corpus and cross-corpus back onto EdAcc.
+
 ---
 
 ## 1. Headline table
@@ -25,7 +29,7 @@ Per-group WER (%), lower is better. Sorted by mean WER.
 | Moonshine Streaming ᴺᴰ | 245M | 16.5 | 18.0 | 34.7 | 23.5 | 30.2 | 26.2 | 39.6 | **26.8** | 39.6 | 23.1 |
 | Whisper-small † | 244M | 34.2 | 40.0 | 87.9 | 98.2 | 82.0 | 104.6 | 102.9 | **80.3** | 104.6 | 70.4 |
 
-ᴺᴰ Non-deterministic: fails the §4.5 determinism gate. Measured band at n=300: 10.0% utterance
+ᴺᴰ Non-deterministic: fails the EVAL_SPEC §4.5 determinism gate. Measured band at n=300: 10.0% utterance
 disagreement between identical passes, |ΔWER| **±0.21 points** overall (worst audited group
 ±1.02, Irish). The band is ~1–2% of the disparities being measured, so results are reportable
 with the band attached.
@@ -106,6 +110,21 @@ not exhibit the failure mode. Moonshine's count of 1 is not comparable: its runt
 **7. Every model ranks the accent groups near-identically** (Indian/Irish best, Vietnamese
 worst for 5 of 7). The disparity is a property of the speech, not of any one architecture.
 
+**8. Fine-tuning buys accuracy, not fairness.** Full fine-tuning of whisper-small on 22 h of
+AfriSpeech cuts macro WER 43% (34.9 → 19.7) and leaves the gap where it found it (9.89 → 9.34).
+The per-group improvement **rank-orders perfectly with each group's training hours** — Yoruba
+(10.1 h) gains 17.9 points, Zulu (0.9 h) gains 11.9, no inversions. Group-DRO, swept across
+tilt strengths of 1.5×–5× with identical budgets, is statistically indistinguishable from ERM
+on every metric (§5.2). Disparity survived the intervention designed to remove it.
+
+**9. The mitigation does not transfer — it inverts.** Both fine-tuned models are *worse* on
+every one of EdAcc's seven groups than the base they started from, and the gap widens by
+two-thirds (70.4 → 89.0 ERM, → 117.3 DRO). The arm selected for fairness transferred worst.
+The likely mechanism is domain specialisation (short read clinical speech → long-form
+conversation) rather than accent specialisation, and the confound is acknowledged in §5.4 —
+but a fairness fix that degrades every group out-of-corpus is a result the literature rarely
+looks for.
+
 ---
 
 ## 4. Efficiency
@@ -172,11 +191,11 @@ gracefully when queued.
 
 ## 5. Mitigation — can fine-tuning fix the disparity?
 
-Base: `whisper-small`, full fine-tune. Data: AfriSpeech-200, 5 accent groups meeting the §3
+Base: `whisper-small`, full fine-tune. Data: AfriSpeech-200, 5 accent groups meeting the EVAL_SPEC §3
 rule in **both** train and test (hausa, igbo, swahili, yoruba, zulu), subsampled to 22.0 h
 preserving the natural 11.5× group imbalance (seed 3407, speaker-stratified). Arms: **ERM**
 (mean loss) and **Group-DRO** (group-weighted), identical 16,800-step budgets, effective batch
-16, lr 1e-5. ERM selected on validation mean WER, DRO on validation worst-group WER, as §6
+16, lr 1e-5. ERM selected on validation mean WER, DRO on validation worst-group WER, as EVAL_SPEC §6
 requires. Test split: 1,889 utterances, 403 speakers — an order of magnitude more speakers per
 group than EdAcc offers.
 
@@ -239,7 +258,7 @@ did, each of which would have produced a plausible-looking null (EVAL_SPEC chang
    renormalisation in its absence. Result: q(yoruba) = 0.87, Zulu at the floor — DRO chasing the
    *largest* group rather than the hardest.
 2. **Cumulative collapse.** Exponentiated gradient weights by the running *product* of past
-   losses, so concentration grows with the training horizon. At η=0.01 — the smallest value §6
+   losses, so concentration grows with the training horizon. At η=0.01 — the smallest value EVAL_SPEC §6
    specified — an EMA loss spread of 0.38 nats drove q(hausa) to 0.87 by step 1,450 of 16,800,
    with every snapshot post-collapse.
 3. **Scale annihilation.** A stationary softmax over *absolute* loss goes uniform as training
@@ -247,7 +266,7 @@ did, each of which would have produced a plausible-looking null (EVAL_SPEC chang
    *relative* gap it should act on was undiminished. From ~step 3,000 that arm simply was ERM.
 
 The final form — a softmax over each group's EMA loss **relative to the current mean**, floored
-at 1e-3 — is stationary, scale-invariant and self-correcting. It departs from the online rule §6
+at 1e-3 — is stationary, scale-invariant and self-correcting. It departs from the online rule EVAL_SPEC §6
 originally specified; a reader who considers the textbook form the object of study should read
 the null accordingly.
 
@@ -311,9 +330,10 @@ disparity metric**, with the gap secondary. This harness reports both by default
   `IGNORE_TIME_SEGMENT_IN_SCORING` or containing `<FOREIGN>` are dropped; the highest exclusion
   rate is Spanish at 3.1% (22 of 27 exclusions are code-switching), all others below 1.4%.
 - **Long-audio handling differs by backend.** NeMo models chunk utterances above 120 s
-  (16 of 9,177; conformer attention memory is O(T²) and a 536 s utterance faults an 8 GB GPU),
-  while Whisper models used native sequential long-form decoding with full context. NeMo models
-  are mildly disadvantaged on 0.17% of data.
+  (16 of 9,177 across the full split, 12 of the 5,087 audited; conformer attention memory is
+  O(T²) and a 536 s utterance faults an 8 GB GPU), while Whisper models used native sequential
+  long-form decoding with full context. NeMo models are mildly disadvantaged on 0.24% of
+  audited data — see §8 A2.
 - **Moonshine's runtime differs from the others' in two ways** beyond precision: VAD
   re-segmentation, and the loop-truncation heuristic noted above. Both are its documented
   defaults, but its loop count and, to a lesser degree, its WER reflect library policy as well
@@ -338,10 +358,92 @@ disparity metric**, with the gap secondary. This harness reports both by default
   state, but the protocol's own check is indeterminate there (EVAL_SPEC §4.2).
 - **Efficiency and accuracy were measured in separate runs**, as the spec requires, so the
   throughput figures come from a 120-clip sample rather than the full 5,087-utterance test set.
+- **Part 3's null is bounded, not absolute.** The paired CI on Δ worst-group is [−1.69, +3.48],
+  a half-width of ~2.5 points: effects larger than roughly 2 points are excluded, smaller ones
+  are not. The claim is *no detectable effect at this sample size*.
+- **Part 3 tests one base model, one corpus, one architecture.** whisper-small only, 5 AfriSpeech
+  groups, 22 h of audio. Whether Group-DRO behaves differently on a transducer, a larger model,
+  or different group structure is untested — as is whether the negative transfer in §5.4 is
+  specific to this corpus pair's domain shift.
+- **The final Group-DRO formulation departs from the rule EVAL_SPEC §6 specified.** Three implementation
+  faults in the textbook online update had to be corrected (§5.3); the working version is
+  stationary and scale-invariant. A reader who considers the textbook form the object of study
+  should read the null accordingly.
+
+Fuller treatment, including the items above and the τ=1.0 training divergence, in
+[`LIMITATIONS.md`](LIMITATIONS.md).
 
 ---
 
-## 8. Reproducing
+## 8. Appendix
+
+### A1. Cleaning exclusions by group (EdAcc test)
+
+EVAL_SPEC §4.3 rules 1–2 drop utterances marked `IGNORE_TIME_SEGMENT_IN_SCORING` (corpus-marked
+unscoreable) or containing `<FOREIGN>` (spoken non-English absent from the reference —
+stripping the tag would charge models insertions for correctly transcribing real speech).
+Code-switching correlates with accent, so these exclusions are **not random with respect to
+group** and are reported per group as EVAL_SPEC §4.3 requires.
+
+| group | kept | dropped | rate | reasons |
+|---|---|---|---|---|
+| Spanish | 852 | 27 | **3.07%** | 22 foreign, 5 ignore-segment |
+| Mainstream US English | 875 | 12 | 1.35% | 9 ignore-segment, 3 foreign |
+| Vietnamese | 577 | 6 | 1.03% | 6 ignore-segment |
+| Irish English | 350 | 3 | 0.85% | 3 ignore-segment |
+| Jamaican English | 455 | 3 | 0.66% | 3 ignore-segment |
+| Indian English | 627 | 4 | 0.63% | 4 ignore-segment |
+| Nigerian English | 1,351 | 5 | 0.37% | 5 ignore-segment |
+| **audited total** | **5,087** | **60** | **1.17%** | |
+
+No group approaches the 10% threshold EVAL_SPEC §4.3 sets for flagging. Spanish is the outlier and the
+reason is interpretable: 22 of its 27 exclusions are code-switching, consistent with Spanish–
+English bilingual speakers. The 17 pooled groups contribute a further 4,090 kept / 52 dropped
+and enter no disparity metric.
+
+### A2. Long-audio chunking (NeMo backends only)
+
+NeMo models chunk utterances above 120 s; Whisper models use native sequential long-form
+decoding with full context. **12 of the 5,087 audited utterances (0.24%)** are affected,
+identically for both NeMo models: Mainstream US 5, Indian 3, Nigerian 2, Irish 1, Jamaican 1.
+(16 of 9,177 are chunked across the whole test split; the other 4 fall in pooled groups that
+enter no metric.) Long turns cluster by speaker, so this is reported per group rather than as a
+total. It cannot account for any reported difference, but NeMo models are mildly disadvantaged
+on those utterances.
+
+### A3. Hallucination loops by group
+
+Runaway repetition, flagged when the normalized hypothesis exceeds max(10, 5× the reference
+word count). Loops **remain in WER** — they are deployed-default behaviour — and this diagnostic
+only makes their frequency and group correlation visible.
+
+| model | US | Nigerian | Spanish | Vietnamese | Jamaican | Irish | Indian | total |
+|---|---|---|---|---|---|---|---|---|
+| Whisper-small | 109 | 111 | 62 | 39 | 34 | 26 | 20 | **401** |
+| Distil-Whisper v3.5 | 4 | 2 | 4 | 1 | 1 | 1 | 0 | 13 |
+| Whisper large-v3-turbo | 1 | 2 | 2 | 1 | 0 | 0 | 0 | 6 |
+| Parakeet TDT v2 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | **0** |
+| Parakeet TDT v3 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | **0** |
+| Canary-Qwen 2.5B | 0 | 0 | 0 | 0 | 0 | 0 | 0 | **0** |
+| Moonshine Streaming ᶜ | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
+
+ᶜ Not comparable: the Moonshine runtime applies a `max_tokens_per_second` truncation heuristic
+that suppresses loops at the library level. No Whisper-family model has an equivalent.
+
+The failure mode is confined to the autoregressive Whisper decoder — RNN-T transducers and the
+SALM decoder produce none — and within Whisper it concentrates on the groups with the most
+audio rather than the worst WER (US and Nigerian lead, Indian trails), so it is not simply a
+function of difficulty.
+
+### A4. Language misdetection
+
+Parakeet v3 and Canary-Qwen auto-detect language; an accent triggering wrong-language detection
+would itself be a fairness finding (EVAL_SPEC §5). Across all 5,087 audited utterances: **0 misdetections**
+for both models.
+
+---
+
+## 9. Reproducing
 
 ```bash
 pip install -e ".[dev]"
