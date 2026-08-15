@@ -222,6 +222,15 @@ band is the correct treatment.
 - 2026-08-06: Resolved decision 3 (EdAcc marker rules) from raw-data inspection. Spec is frozen
   for accuracy methodology; only decision 4 (load-test concurrency) remains, pending feasibility
   measurements.
+- 2026-08-14: **Provenance added to accuracy runs (§5, §7); two runs predate it.** `run_audit.py`
+  recorded `harness_commit` but no library/CUDA versions — the gap flagged on 2026-08-11 and left
+  open while Part 3 ran. Now writes the full `provenance` block. The two cross-corpus audits
+  (`results/ft-erm-edacc`, `results/ft-dro-edacc`) were produced *before* this patch and carry the
+  commit only; not re-run, because 2.5 h of GPU for a metadata field is not a good trade. Their
+  environment is the same WSL2 stack recorded in every Part 3 efficiency and eval file of the same
+  date. Undeclared dependencies also fixed in `pyproject.toml`: `moonshine-voice`, `bitsandbytes`
+  (Part 3 needs 8-bit Adam to fit 8 GB) and `matplotlib` were required by the pipeline but absent
+  from the extras.
 - 2026-08-13: **Part 3 result — Group-DRO indistinguishable from ERM (§6).** Sweep complete:
   τ ∈ {1.0, 0.5, 0.25}, identical 16,800-step budgets, ERM selected on validation mean WER and DRO
   on validation worst-group WER as §6 requires. Selected pair τ=0.5 / step4200. Paired

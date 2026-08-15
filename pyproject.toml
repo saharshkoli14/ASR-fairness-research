@@ -25,6 +25,11 @@ dependencies = [
 
 [project.optional-dependencies]
 nemo = ["nemo_toolkit[asr]"]          # Linux/WSL2 only — required for Parakeet and Canary-Qwen
+moonshine = ["moonshine-voice"]       # official CPU-only ONNX runtime; the reportable Moonshine path
+finetune = [                          # Part 3 (EVAL_SPEC §6) — Linux/WSL2
+    "bitsandbytes",                   # 8-bit Adam; whisper-small full FT does not fit 8 GB without it
+]
+plots = ["matplotlib"]                # scripts/plot_frontier.py
 dev = ["pytest", "ruff"]
 
 [tool.setuptools.packages.find]

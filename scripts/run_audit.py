@@ -26,6 +26,7 @@ from asr_fairness_audit import MODELS, get_transcriber, load_pins  # noqa: E402
 from asr_fairness_audit.data.edacc import exclusion_report, load_edacc  # noqa: E402
 from asr_fairness_audit.metrics import Utterance, bootstrap_ci, evaluate  # noqa: E402
 from asr_fairness_audit.normalize import normalize, normalize_reference, vendor_info  # noqa: E402
+from asr_fairness_audit.provenance import run_provenance  # noqa: E402
 
 BATCH = 16  # utterances fetched per transcribe() call (backend batches internally)
 
@@ -149,6 +150,9 @@ def main():
         "split": args.split,
         "limit": args.limit,
         "harness_commit": harness_commit(),
+        # §5/§7: library + CUDA versions per run. pins.json records one machine at
+        # pin time; NeMo runs under WSL2 and HF runs on Windows use different stacks.
+        "provenance": run_provenance(),
         "normalizer_source": vendor_info()["commit"],
         "n_scored_utterances": len(utts),
         "language_misdetections": lang_misdetect,

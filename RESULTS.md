@@ -446,15 +446,32 @@ for both models.
 ## 9. Reproducing
 
 ```bash
-pip install -e ".[dev]"
+pip install -e ".[dev]"                # extras: .[nemo] .[moonshine] .[finetune] .[plots]
 python pin.py                          # resolve checkpoint + dataset revisions
 python scripts/vendor_normalizer.py    # freeze the text normalizer
 python scripts/make_groups.py          # freeze accent groups from the pinned split
+
+# §1–3 accuracy
 python scripts/run_audit.py --model parakeet-tdt-0.6b-v3
 python scripts/verify_determinism.py parakeet-tdt-0.6b-v3
 python scripts/compare_models.py --bonferroni --metric worst_group_wer
 python scripts/verify_scoring_consistency.py   # re-score all models in one interpreter
+
+# §4 efficiency
+python scripts/run_efficiency.py --model parakeet-tdt-0.6b-v3
+python scripts/plot_frontier.py
+
+# §5 mitigation — see README for the full Part 3 sequence
+python scripts/prepare_afrispeech.py --data-dir <data-dir>
+python scripts/train_afrispeech.py --data-dir <data-dir> --arm erm --steps 16800
+python scripts/eval_finetuned.py --data-dir <data-dir> --ckpt results/ft/erm --all --split val
+python scripts/compare_arms.py --a <erm transcripts> --b <dro transcripts>
+python scripts/run_audit.py --model whisper-small \
+    --checkpoint results/ft/erm/step4200 --tag ft-erm-edacc     # cross-corpus
 ```
+
+Full repository layout and the complete Part 3 command sequence are in
+[`README.md`](README.md).
 
 The audit ran across two environments (NeMo under WSL2, HF on Windows) carrying different major
 versions of jiwer. `verify_scoring_consistency.py` re-scores every model from the committed
